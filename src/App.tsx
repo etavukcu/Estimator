@@ -14,7 +14,6 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import jsPDF from 'jspdf'
-import logo from './assets/peaceful-haven-logo.svg'
 
 type TierKey = 'good' | 'better' | 'best'
 
@@ -45,6 +44,8 @@ type Project = {
   baseRanges: Record<TierKey, [number, number]>
   sections: Section[]
 }
+
+const HEADER_LOGO_PATH = '/logo.png'
 
 const BRAND = {
   ink: '#1F2A37',
@@ -802,7 +803,7 @@ export default function App() {
       <div className="container">
         <div className="header-row">
           <div className="brand-wrap">
-            <img src={logo} alt="Peaceful Haven Homes logo" className="brand-logo" />
+            <img src={HEADER_LOGO_PATH} alt="Peaceful Haven Homes logo" className="brand-logo" onError={(e) => { e.currentTarget.style.display = "none" }} />
             <div>
               <div className="brand-kicker" style={{ color: BRAND.forest }}>Peaceful Haven Homes</div>
               <h1 className="app-title" style={{ color: BRAND.ink }}>Project Range Estimator</h1>
