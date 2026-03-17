@@ -14,6 +14,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import jsPDF from 'jspdf'
+import logo from './assets/peaceful-haven-logo.svg'
 
 type TierKey = 'good' | 'better' | 'best'
 
@@ -46,11 +47,11 @@ type Project = {
 }
 
 const BRAND = {
-  ink: '#2F3A32',
-  forest: '#5E6F64',
-  sage: '#A3B18A',
-  sand: '#EDE6DA',
-  cream: '#F8F5EF',
+  ink: '#1F2A37',
+  forest: '#365D87',
+  sage: '#74D6CF',
+  sand: '#D9E9F8',
+  cream: '#F4F7FA',
 }
 
 const TIERS: Record<TierKey, { label: string; subtitle: string; description: string; highlight: boolean }> = {
@@ -569,23 +570,23 @@ export default function App() {
       pdf.text(lines, marginX, y)
       y += lines.length * gap
     }
-    pdf.setFillColor(47, 58, 50)
+    pdf.setFillColor(31, 42, 55)
     pdf.roundedRect(36, 28, 540, 88, 16, 16, 'F')
-    pdf.setTextColor(248, 245, 239)
+    pdf.setTextColor(244, 247, 250)
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(20)
     pdf.text('Peaceful Haven Homes', marginX, 62)
     pdf.setFontSize(16)
     pdf.text('Project Planning Range Summary', marginX, 88)
     y = 146
-    pdf.setTextColor(47, 58, 50)
+    pdf.setTextColor(31, 42, 55)
     writeLine(`Client: ${lead.fullName || 'Prospective Client'}`)
     writeLine(`Email: ${lead.email || 'Not provided'}`)
     writeLine(`Phone: ${lead.phone || 'Not provided'}`)
     writeLine(`Date: ${new Date().toLocaleDateString()}`)
     y += 8
-    pdf.setFillColor(237, 230, 218)
-    pdf.roundedRect(marginX, y, 520, 76, 14, 14, 'F')
+    pdf.setFillColor(217, 233, 248)
+    pdf.roundedRect(marginX, y, 520, 106, 14, 14, 'F')
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(13)
     pdf.text('Project Overview', marginX + 16, y + 22)
@@ -593,12 +594,14 @@ export default function App() {
     pdf.setFontSize(11)
     pdf.text(`Project type: ${project.name}`, marginX + 16, y + 42)
     pdf.text(`Selected tier: ${TIERS[tier as TierKey].label}`, marginX + 16, y + 58)
-    pdf.setTextColor(94, 111, 100)
+    pdf.text('Phone: 423-777-6849', marginX + 16, y + 74)
+    pdf.setTextColor(54, 93, 135)
     pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(16)
-    pdf.text(`Estimated planning range: ${rangeToText([estimate.low, estimate.high])}`, 308, y + 48, { align: 'center' })
-    y += 100
-    pdf.setTextColor(47, 58, 50)
+    pdf.setFontSize(14)
+    const rangeLines = pdf.splitTextToSize(`Estimated planning range: ${rangeToText([estimate.low, estimate.high])}`, 220)
+    pdf.text(rangeLines, 552, y + 40, { align: 'right' })
+    y += 130
+    pdf.setTextColor(31, 42, 55)
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(13)
     pdf.text('Selections', marginX, y)
@@ -629,7 +632,7 @@ export default function App() {
           <h2 className="hero-title" style={{ color: BRAND.ink }}>Get a planning range for your remodel.</h2>
           <p className="hero-copy">Answer a few guided questions and receive a tailored project range based on your project type, finish level, and selections.</p>
           <div className="grid-three">
-            {['Tailored to your selections', 'Designed around realistic finish levels', 'Delivered as a branded PDF summary'].map((item) => (
+            {['Tailored to your selections', 'Designed around realistic finish levels', 'Download PDF Summary'].map((item) => (
               <div key={item} className="feature-box" style={{ backgroundColor: BRAND.sand, color: BRAND.ink }}>{item}</div>
             ))}
           </div>
@@ -798,11 +801,20 @@ export default function App() {
     <div className="page" style={{ backgroundColor: BRAND.cream }}>
       <div className="container">
         <div className="header-row">
-          <div>
-            <div className="brand-kicker" style={{ color: BRAND.forest }}>Peaceful Haven Homes</div>
-            <h1 className="app-title" style={{ color: BRAND.ink }}>Project Range Estimator</h1>
+          <div className="brand-wrap">
+            <img src={logo} alt="Peaceful Haven Homes logo" className="brand-logo" />
+            <div>
+              <div className="brand-kicker" style={{ color: BRAND.forest }}>Peaceful Haven Homes</div>
+              <h1 className="app-title" style={{ color: BRAND.ink }}>Project Range Estimator</h1>
+            </div>
           </div>
-          <span className="top-badge" style={{ backgroundColor: BRAND.sand, color: BRAND.ink, borderColor: BRAND.sage }}>Guided Planning Tool</span>
+          <div className="header-contact-wrap">
+            <div className="header-contact" style={{ color: BRAND.forest }}>
+              <Phone className="icon-inline" />
+              423-777-6849
+            </div>
+            <span className="top-badge" style={{ backgroundColor: BRAND.sand, color: BRAND.ink, borderColor: BRAND.sage }}>Guided Planning Tool</span>
+          </div>
         </div>
 
         {step > 0 ? (
