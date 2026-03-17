@@ -809,11 +809,10 @@ export default function App() {
             </div>
           </div>
           <div className="header-contact-wrap">
-            <div className="header-contact" style={{ color: BRAND.forest }}>
+            <a className="header-contact" style={{ color: BRAND.forest }} href="tel:4237776849" aria-label="Call Peaceful Haven Homes at 423-777-6849">
               <Phone className="icon-inline" />
               423-777-6849
-            </div>
-            <span className="top-badge" style={{ backgroundColor: BRAND.sand, color: BRAND.ink, borderColor: BRAND.sage }}>Guided Planning Tool</span>
+            </a>
           </div>
         </div>
 
