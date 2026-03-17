@@ -10,6 +10,7 @@
     "postinstall": "node -e \"const fs=require('fs');const p='node_modules/@esbuild/linux-x64/bin/esbuild';if(fs.existsSync(p)){fs.chmodSync(p,0o755);console.log('Ensured executable permission for '+p);}\""
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "framer-motion": "^12.23.12",
     "jspdf": "^3.0.3",
     "lucide-react": "^0.542.0",
