@@ -46,6 +46,8 @@ type Project = {
   sections: Section[]
 }
 
+const HEADER_LOGO_PATH = '/logo.png'
+
 const BRAND = {
   ink: '#1F2A37',
   forest: '#365D87',
@@ -802,7 +804,7 @@ export default function App() {
       <div className="container">
         <div className="header-row">
           <div className="brand-wrap">
-            <img src={logo} alt="Peaceful Haven Homes logo" className="brand-logo" />
+            <img src={HEADER_LOGO_PATH} alt="Peaceful Haven Homes logo" className="brand-logo" onError={(e) => { e.currentTarget.style.display = "none" }} />
             <div>
               <div className="brand-kicker" style={{ color: BRAND.forest }}>Peaceful Haven Homes</div>
               <h1 className="app-title" style={{ color: BRAND.ink }}>Project Range Estimator</h1>
