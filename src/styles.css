@@ -22,7 +22,9 @@
 .brand-wrap { display: flex; align-items: center; gap: 14px; }
 .brand-logo { width: 220px; max-width: 40vw; height: auto; object-fit: contain; }
 .header-contact-wrap { display: flex; align-items: center; gap: 12px; }
-.header-contact { display: inline-flex; align-items: center; gap: 6px; font-size: 18px; font-weight: 800; }
+.header-contact { display: inline-flex; align-items: center; gap: 8px; font-size: clamp(24px, 2.6vw, 34px); font-weight: 800; text-decoration: none; }
+.header-contact:hover { text-decoration: underline; }
+.header-contact .icon-inline { width: 20px; height: 20px; }
 .kicker.light { color: #d6d3d1; }
 .app-title { margin: 0; font-size: 32px; }
 .hero-title { margin: 24px 0 0; font-size: clamp(38px, 5vw, 56px); line-height: 1.05; }
@@ -81,6 +83,7 @@
   .layout-two, .layout-two-results, .grid-two, .grid-three, .grid-four { grid-template-columns: 1fr; }
   .header-row, .nav-row, .row-gap { flex-direction: column; align-items: stretch; }
   .brand-wrap, .header-contact-wrap { justify-content: center; }
+  .header-contact { font-size: clamp(28px, 8vw, 34px); }
   .brand-wrap { flex-direction: column; align-items: center; text-align: center; }
   .brand-kicker { display: none; }
   .brand-logo { width: min(220px, 80vw); max-width: 80vw; }
