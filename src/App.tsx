@@ -14,6 +14,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import jsPDF from 'jspdf'
+import logo from './assets/peaceful-haven-logo.svg'
 
 type TierKey = 'good' | 'better' | 'best'
 
@@ -45,7 +46,7 @@ type Project = {
   sections: Section[]
 }
 
-const HEADER_LOGO_PATH = '/logo.svg'
+const HEADER_LOGO_PATH = '/logo.png'
 
 const BRAND = {
   ink: '#1F2A37',
