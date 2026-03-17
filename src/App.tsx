@@ -14,6 +14,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import jsPDF from 'jspdf'
+import logo from './assets/peaceful-haven-logo.svg'
 
 type TierKey = 'good' | 'better' | 'best'
 
