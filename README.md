@@ -1,19 +1,13 @@
 # Peaceful Haven Homes Estimator
 
-A Vite + React estimator with a server/API endpoint that automatically emails lead submissions to `info@peacefulhavenhomes.com` (no `mailto:` dependency).
+A Vite + React estimator that guides users through project questions and generates a downloadable PDF summary.
 
 ## Environment setup
 
-Copy `.env.example` to `.env` and provide at least:
-
-```bash
-RESEND_API_KEY=your_resend_api_key
-```
+Copy `.env.example` to `.env` if you need custom client variables.
 
 Optional:
-
-- `EMAIL_FROM` to override the sender address.
-- `VITE_API_BASE_URL` for local front-end to reach a separately running API server.
+- `VITE_API_BASE_URL` if you want the front-end to point at a custom backend.
 
 ## Run locally
 
@@ -24,16 +18,12 @@ npm install
 npm run dev:client
 ```
 
-### API + static server
+### Static server
 
 ```bash
 npm run build
 npm run dev:server
 ```
-
-The API route is:
-
-- `POST /api/estimate-leads`
 
 ## Build
 
