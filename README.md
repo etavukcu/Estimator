@@ -8,6 +8,7 @@ Copy `.env.example` to `.env` if you need custom client variables.
 
 Optional:
 - `VITE_API_BASE_URL` if you want the front-end to point at a custom backend.
+- `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for consultation request capture in Supabase.
 
 ## Run locally
 
