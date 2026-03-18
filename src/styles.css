@@ -52,7 +52,6 @@
 .select-card { width: 100%; border: 1px solid #e7e5e4; border-radius: 24px; padding: 20px; background: white; text-align: left; cursor: pointer; transition: .2s ease; }
 .select-card:hover { border-color: #a8a29e; box-shadow: 0 2px 6px rgba(0,0,0,.06); }
 .select-card-active { border-color: transparent; color: white; box-shadow: 0 10px 24px rgba(47,58,50,.18); }
-.option-photo { width: 100%; height: 148px; object-fit: cover; border-radius: 14px; display: block; }
 .option-title, .project-title, .tier-title { font-size: 18px; font-weight: 700; }
 .option-helper, .project-copy, .tier-subtitle, .tier-copy { margin-top: 8px; color: #78716c; }
 .option-helper-active, .project-copy-active, .tier-subtitle-active, .tier-copy-active { color: #e7e5e4; }
