@@ -26,45 +26,6 @@ type Option = {
   tiers?: TierKey[]
 }
 
-const KITCHEN_OPTION_PHOTOS: Record<string, string> = {
-  'size:small': 'https://images.unsplash.com/photo-1556911220-bda9f7f7597e?auto=format&fit=crop&w=640&q=70',
-  'size:medium': 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=640&q=70',
-  'size:large': 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=640&q=70',
-  'layout:same': 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=640&q=70',
-  'layout:minor': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=640&q=70',
-  'layout:major': 'https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=640&q=70',
-  'cabinetType:stock': 'https://images.unsplash.com/photo-1556911073-52527ac43795?auto=format&fit=crop&w=640&q=70',
-  'cabinetType:semi': 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=640&q=70',
-  'cabinetType:custom': 'https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?auto=format&fit=crop&w=640&q=70',
-  'cabinetMaterial:mdf': 'https://images.unsplash.com/photo-1600210491369-e753d80a41f3?auto=format&fit=crop&w=640&q=70',
-  'cabinetMaterial:paint': 'https://images.unsplash.com/photo-1600488999176-91f1462f8d92?auto=format&fit=crop&w=640&q=70',
-  'cabinetMaterial:maple': 'https://images.unsplash.com/photo-1600607687644-a741fce0b227?auto=format&fit=crop&w=640&q=70',
-  'cabinetMaterial:oak': 'https://images.unsplash.com/photo-1560185008-b033106af5c3?auto=format&fit=crop&w=640&q=70',
-  'cabinetMaterial:walnut': 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=640&q=70',
-  'countertop:laminate': 'https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=640&q=70',
-  'countertop:butcher': 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=640&q=70',
-  'countertop:entryQuartz': 'https://images.unsplash.com/photo-1588854337115-1c67d9247e4d?auto=format&fit=crop&w=640&q=70',
-  'countertop:quartz': 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=640&q=70',
-  'countertop:granite': 'https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=640&q=70',
-  'countertop:quartzite': 'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=640&q=70',
-  'countertop:marble': 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=640&q=70',
-  'backsplash:none': 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=640&q=70',
-  'backsplash:standard': 'https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?auto=format&fit=crop&w=640&q=70',
-  'backsplash:custom': 'https://images.unsplash.com/photo-1600494603989-9650cf6ddd3d?auto=format&fit=crop&w=640&q=70',
-  'flooring:existing': 'https://images.unsplash.com/photo-1495433324511-bf8e92934d90?auto=format&fit=crop&w=640&q=70',
-  'flooring:lvp': 'https://images.unsplash.com/photo-1616594039964-3deeb6f062f8?auto=format&fit=crop&w=640&q=70',
-  'flooring:tile': 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=640&q=70',
-  'flooring:hardwood': 'https://images.unsplash.com/photo-1600566752227-8f33d57ad84d?auto=format&fit=crop&w=640&q=70',
-  'appliances:none': 'https://images.unsplash.com/photo-1556910633-5099dc3971f4?auto=format&fit=crop&w=640&q=70',
-  'appliances:standard': 'https://images.unsplash.com/photo-1586208958839-06c17cacdf08?auto=format&fit=crop&w=640&q=70',
-  'appliances:premium': 'https://images.unsplash.com/photo-1556909190-eccf4a8bf97a?auto=format&fit=crop&w=640&q=70',
-}
-
-function getOptionPhoto(projectId: string, questionId: string, optionValue: string) {
-  if (projectId !== 'kitchen') return undefined
-  return KITCHEN_OPTION_PHOTOS[`${questionId}:${optionValue}`]
-}
-
 type Question = {
   id: string
   label: string
@@ -513,26 +474,13 @@ function OptionCards({
   question,
   value,
   onChange,
-  projectId,
-}: { question: Question; value?: string; onChange: (value: string) => void; projectId: string }) {
+}: { question: Question; value?: string; onChange: (value: string) => void }) {
   return (
     <div className="grid-two">
       {question.options.map((option) => {
         const active = value === option.value
-        const image = getOptionPhoto(projectId, question.id, option.value)
         return (
           <SelectCard key={option.value} type="button" active={active} onClick={() => onChange(option.value)}>
-            {image ? (
-              <img
-                src={image}
-                alt={`${option.label} sample`}
-                className="option-photo"
-                loading="lazy"
-                decoding="async"
-                width={640}
-                height={360}
-              />
-            ) : null}
             <div className="row-between top-gap">
               <div>
                 <div className="option-title">{option.label}</div>
@@ -770,7 +718,6 @@ export default function App() {
             question={currentQuestion}
             value={answers[currentQuestion.id]}
             onChange={(value) => updateAnswer(currentQuestion.id, value)}
-            projectId={project?.id || ''}
           />
         </div>
       </div>
