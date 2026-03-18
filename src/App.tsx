@@ -46,6 +46,17 @@ type Project = {
   sections: Section[]
 }
 
+type LeadPayload = {
+  fullName: string
+  email: string
+  phone: string
+  notes: string
+  projectName: string
+  tierLabel: string
+  estimateRange: string
+  summary: Array<{ section: string; answer: string }>
+}
+
 const BRAND = {
   ink: '#1F2A37',
   forest: '#365D87',
@@ -514,6 +525,9 @@ export default function App() {
   const [tier, setTier] = useState('')
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [lead, setLead] = useState({ fullName: '', email: '', phone: '', notes: '' })
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false)
+  const [leadSubmitError, setLeadSubmitError] = useState('')
+  const [leadSubmitted, setLeadSubmitted] = useState(false)
 
   const project = useMemo(() => getProject(projectId), [projectId])
   const activeQuestions = useMemo(() => getAllQuestions(project, tier), [project, tier])
@@ -560,6 +574,50 @@ export default function App() {
 
   function updateAnswer(questionId: string, value: string) {
     setAnswers((prev) => ({ ...prev, [questionId]: value }))
+  }
+
+  async function submitLead() {
+    if (!project || !tier || !estimate) return false
+    if (leadSubmitted) return true
+
+    const payload: LeadPayload = {
+      fullName: lead.fullName.trim(),
+      email: lead.email.trim(),
+      phone: lead.phone.trim(),
+      notes: lead.notes.trim(),
+      projectName: project.name,
+      tierLabel: TIERS[tier as TierKey].label,
+      estimateRange: rangeToText([estimate.low, estimate.high]),
+      summary: estimate.summary,
+    }
+
+    setIsSubmittingLead(true)
+    setLeadSubmitError('')
+    try {
+      const apiBase = import.meta.env.VITE_API_BASE_URL || ''
+      const response = await fetch(`${apiBase}/api/estimate-leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const body = await response.json().catch(async () => ({ error: await response.text() }))
+        const fallbackMessage = response.status === 404
+          ? 'Submission API not found. Please verify the server/API is running.'
+          : 'Unable to submit your details right now.'
+        throw new Error(body?.error || fallbackMessage)
+      }
+
+      setLeadSubmitted(true)
+      return true
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to submit your details right now.'
+      setLeadSubmitError(message)
+      return false
+    } finally {
+      setIsSubmittingLead(false)
+    }
   }
 
   function downloadPdf() {
@@ -729,7 +787,7 @@ export default function App() {
       <Card>
         <div className="card-pad">
           <div className="section-title" style={{ color: BRAND.ink }}>Where should we label your estimate?</div>
-          <div className="section-copy">This info is used only inside the PDF you download.</div>
+          <div className="section-copy">We securely send this info to our team and also include it in your PDF.</div>
           <div className="form-stack top-lg">
             <Field label="Full name" icon={<User className="field-icon" />} value={lead.fullName} onChange={(v) => setLead((p) => ({ ...p, fullName: v }))} placeholder="Your full name" />
             <Field label="Email" icon={<Mail className="field-icon" />} value={lead.email} onChange={(v) => setLead((p) => ({ ...p, email: v }))} placeholder="you@example.com" type="email" />
@@ -738,6 +796,7 @@ export default function App() {
               <label className="label">Anything else you want us to know? (optional)</label>
               <textarea className="textarea" value={lead.notes} onChange={(e) => setLead((p) => ({ ...p, notes: e.target.value }))} placeholder="Tell us about timing, goals, or special requests." />
             </div>
+            {leadSubmitError ? <div className="section-copy" style={{ color: '#b91c1c' }}>{leadSubmitError}</div> : null}
           </div>
         </div>
       </Card>
@@ -749,7 +808,7 @@ export default function App() {
             <InfoBlock label="Selected tier" value={tier ? TIERS[tier as TierKey].label : '-'} pill />
             <InfoBlock label="Current planning range" value={estimate ? rangeToText([estimate.low, estimate.high]) : '-'} range />
           </div>
-          <div className="info-box top-xl">This version keeps things simple: clients review the range and download the PDF themselves.</div>
+          <div className="info-box top-xl">When you continue, your details and project summary are sent directly to Peaceful Haven Homes.</div>
         </div>
       </Card>
     </div>
@@ -846,8 +905,16 @@ export default function App() {
           <div className="nav-row">
             <Button variant="outline" onClick={back} disabled={step === 0} style={{ borderColor: BRAND.sage, color: BRAND.ink }}><ArrowLeft className="icon-inline" /> Back</Button>
             {currentStage === 'lead' ? (
-              <Button className="text-white" style={{ backgroundColor: BRAND.ink }} onClick={() => setStep(stages.length - 1)} disabled={!canContinue()}>
-                See My Estimate <ArrowRight className="icon-inline" />
+              <Button
+                className="text-white"
+                style={{ backgroundColor: BRAND.ink }}
+                onClick={async () => {
+                  const isSent = await submitLead()
+                  if (isSent) setStep(stages.length - 1)
+                }}
+                disabled={!canContinue() || isSubmittingLead}
+              >
+                {isSubmittingLead ? 'Sending…' : 'See My Estimate'} <ArrowRight className="icon-inline" />
               </Button>
             ) : (
               <Button className="text-white" style={{ backgroundColor: BRAND.ink }} onClick={next} disabled={!canContinue()}>
