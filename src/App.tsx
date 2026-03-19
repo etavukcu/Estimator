@@ -664,10 +664,6 @@ export default function App() {
       projectAddress: '',
       notes: '',
     })
-    window.setTimeout(() => {
-      setConsultationOpen(false)
-      setConsultationSuccess('')
-    }, 1400)
   }
 
   function downloadPdf() {
