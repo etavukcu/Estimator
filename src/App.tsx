@@ -895,7 +895,12 @@ export default function App() {
           <div className="form-stack top-xl">
             <Button className="full text-white" style={{ backgroundColor: BRAND.ink }} onClick={downloadPdf}><Download className="icon-inline" /> Download PDF</Button>
             <Button variant="outline" className="full" onClick={openConsultationModal}>Schedule Consultation</Button>
-            <Button variant="outline" className="full">Request Detailed Estimate</Button>
+            <Button variant="outline" className="full" onClick={() => { window.location.href = 'mailto:info@peacefulhavenhomes.com' }}>
+              <Mail className="icon-inline" /> Email Us
+            </Button>
+            <Button variant="outline" className="full" onClick={() => { window.location.href = 'tel:+14237776849' }}>
+              <Phone className="icon-inline" /> Call Us
+            </Button>
           </div>
         </div>
       </Card>
