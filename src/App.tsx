@@ -12,9 +12,14 @@ import {
   Phone,
   User,
   CheckCircle2,
+  CalendarClock,
+  MapPin,
+  Loader2,
+  X,
 } from 'lucide-react'
 import jsPDF from 'jspdf'
 import logo from './assets/peaceful-haven-logo.svg'
+import { insertConsultationRequest } from './lib/supabaseClient'
 
 type TierKey = 'good' | 'better' | 'best'
 
@@ -44,6 +49,14 @@ type Project = {
   description: string
   baseRanges: Record<TierKey, [number, number]>
   sections: Section[]
+}
+
+type EstimateSummary = {
+  projectType: string
+  finishLevel: string
+  estimatedRange: string
+  selections: Array<{ section: string; question: string; answer: string }>
+  preparedFor: string
 }
 
 const BRAND = {
@@ -432,6 +445,16 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
   return { low, high, summary }
 }
 
+function buildEstimateSummary(project: Project | undefined, tier: string, estimate: ReturnType<typeof calculateEstimate>, leadName: string): EstimateSummary {
+  return {
+    projectType: project?.name || 'Not selected',
+    finishLevel: tier ? TIERS[tier as TierKey].label : 'Not selected',
+    estimatedRange: estimate ? rangeToText([estimate.low, estimate.high]) : 'Not available',
+    selections: estimate?.summary || [],
+    preparedFor: leadName || 'Prospective Client',
+  }
+}
+
 function runEstimatorSmokeTests() {
   console.assert(rangeToText([1000, 2000]) === '$1,000 - $2,000', 'rangeToText should format a currency range')
   console.assert(getProject('kitchen')?.name === 'Kitchen Remodel', 'getProject should find kitchen project')
@@ -514,10 +537,26 @@ export default function App() {
   const [tier, setTier] = useState('')
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [lead, setLead] = useState({ fullName: '', email: '', phone: '', notes: '' })
+  const [consultationOpen, setConsultationOpen] = useState(false)
+  const [consultationForm, setConsultationForm] = useState({
+    fullName: '',
+    phone: '',
+    email: '',
+    preferredCallbackTime: '',
+    projectAddress: '',
+    notes: '',
+  })
+  const [consultationError, setConsultationError] = useState('')
+  const [consultationSuccess, setConsultationSuccess] = useState('')
+  const [consultationSubmitting, setConsultationSubmitting] = useState(false)
 
   const project = useMemo(() => getProject(projectId), [projectId])
   const activeQuestions = useMemo(() => getAllQuestions(project, tier), [project, tier])
   const estimate = useMemo(() => calculateEstimate(project, tier, answers), [project, tier, answers])
+  const estimateSummary = useMemo(
+    () => buildEstimateSummary(project, tier, estimate, lead.fullName.trim()),
+    [project, tier, estimate, lead.fullName]
+  )
   const stages = ['welcome', 'project', 'tier', ...activeQuestions.map((q) => q.id), 'lead', 'results']
   const currentStage = stages[step] || 'welcome'
   const currentQuestion = activeQuestions.find((q) => q.id === currentStage)
@@ -560,6 +599,75 @@ export default function App() {
 
   function updateAnswer(questionId: string, value: string) {
     setAnswers((prev) => ({ ...prev, [questionId]: value }))
+  }
+
+  function openConsultationModal() {
+    setConsultationOpen(true)
+    setConsultationError('')
+    setConsultationSuccess('')
+    setConsultationForm((prev) => ({
+      ...prev,
+      fullName: prev.fullName || lead.fullName,
+      phone: prev.phone || lead.phone,
+      email: prev.email || lead.email,
+      notes: prev.notes || lead.notes,
+    }))
+  }
+
+  function closeConsultationModal() {
+    setConsultationOpen(false)
+    setConsultationError('')
+    setConsultationSuccess('')
+    setConsultationSubmitting(false)
+  }
+
+  async function submitConsultationRequest(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setConsultationError('')
+    setConsultationSuccess('')
+
+    const fullName = consultationForm.fullName.trim()
+    const phone = consultationForm.phone.trim()
+    const email = consultationForm.email.trim()
+    if (!fullName || !phone || !email) {
+      setConsultationError('Please enter your full name, phone number, and email address.')
+      return
+    }
+
+    setConsultationSubmitting(true)
+    const payload = {
+      full_name: fullName,
+      phone,
+      email,
+      preferred_callback_time: consultationForm.preferredCallbackTime.trim() || null,
+      project_address: consultationForm.projectAddress.trim() || null,
+      notes: consultationForm.notes.trim() || null,
+      estimate_summary: estimateSummary,
+      created_at: new Date().toISOString(),
+    }
+
+    try {
+      await insertConsultationRequest(payload)
+    } catch (error) {
+      setConsultationSubmitting(false)
+      setConsultationError(error instanceof Error ? error.message : 'Something went wrong. Please try again.')
+      return
+    }
+
+    setConsultationSubmitting(false)
+    setConsultationSuccess('Thank you. We received your request and will contact you soon to schedule your consultation.')
+    setConsultationForm({
+      fullName: '',
+      phone: '',
+      email: '',
+      preferredCallbackTime: '',
+      projectAddress: '',
+      notes: '',
+    })
+    window.setTimeout(() => {
+      setConsultationOpen(false)
+      setConsultationSuccess('')
+    }, 1400)
   }
 
   function downloadPdf() {
@@ -790,7 +898,7 @@ export default function App() {
           <p className="section-copy top-sm">Your result is intended to help set expectations and start the conversation. The next step is a consultation, site review, and detailed scope discussion.</p>
           <div className="form-stack top-xl">
             <Button className="full text-white" style={{ backgroundColor: BRAND.ink }} onClick={downloadPdf}><Download className="icon-inline" /> Download PDF</Button>
-            <Button variant="outline" className="full">Schedule Consultation</Button>
+            <Button variant="outline" className="full" onClick={openConsultationModal}>Schedule Consultation</Button>
             <Button variant="outline" className="full">Request Detailed Estimate</Button>
           </div>
         </div>
@@ -862,6 +970,18 @@ export default function App() {
           </div>
         ) : null}
       </div>
+      {consultationOpen ? (
+        <ConsultationModal
+          form={consultationForm}
+          onChange={(patch) => setConsultationForm((prev) => ({ ...prev, ...patch }))}
+          onClose={closeConsultationModal}
+          onSubmit={submitConsultationRequest}
+          summary={estimateSummary}
+          error={consultationError}
+          success={consultationSuccess}
+          submitting={consultationSubmitting}
+        />
+      ) : null}
     </div>
   )
 }
@@ -873,6 +993,100 @@ function Field({ label, icon, value, onChange, placeholder, type = 'text' }: { l
       <div className="field-wrap">
         {icon}
         <input className="input" type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+      </div>
+    </div>
+  )
+}
+
+function ConsultationModal({
+  form,
+  onChange,
+  onClose,
+  onSubmit,
+  summary,
+  error,
+  success,
+  submitting,
+}: {
+  form: {
+    fullName: string
+    phone: string
+    email: string
+    preferredCallbackTime: string
+    projectAddress: string
+    notes: string
+  }
+  onChange: (patch: Partial<{
+    fullName: string
+    phone: string
+    email: string
+    preferredCallbackTime: string
+    projectAddress: string
+    notes: string
+  }>) => void
+  onClose: () => void
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void
+  summary: EstimateSummary
+  error: string
+  success: string
+  submitting: boolean
+}) {
+  return (
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Schedule Consultation">
+      <div className="modal-card">
+        <div className="modal-header">
+          <div>
+            <div className="kicker" style={{ color: BRAND.forest }}>Peaceful Haven Homes</div>
+            <h3 className="modal-title">Schedule Consultation</h3>
+          </div>
+          <button type="button" className="modal-close" onClick={onClose} aria-label="Close Schedule Consultation form">
+            <X className="icon-inline" />
+          </button>
+        </div>
+        <form className="modal-form top-lg" onSubmit={onSubmit}>
+          <div className="grid-two">
+            <Field label="Full Name *" icon={<User className="field-icon" />} value={form.fullName} onChange={(value) => onChange({ fullName: value })} placeholder="Your full name" />
+            <Field label="Phone Number *" icon={<Phone className="field-icon" />} value={form.phone} onChange={(value) => onChange({ phone: value })} placeholder="(555) 555-5555" />
+          </div>
+          <Field label="Email Address *" icon={<Mail className="field-icon" />} value={form.email} onChange={(value) => onChange({ email: value })} placeholder="you@example.com" type="email" />
+          <div className="grid-two">
+            <Field label="Preferred Callback Time" icon={<CalendarClock className="field-icon" />} value={form.preferredCallbackTime} onChange={(value) => onChange({ preferredCallbackTime: value })} placeholder="Weekdays after 4 PM" />
+            <Field label="Project Address" icon={<MapPin className="field-icon" />} value={form.projectAddress} onChange={(value) => onChange({ projectAddress: value })} placeholder="123 Main St, City, ST" />
+          </div>
+          <div>
+            <label className="label">Notes</label>
+            <textarea className="textarea" value={form.notes} onChange={(event) => onChange({ notes: event.target.value })} placeholder="Tell us about your project timing, priorities, and goals." />
+          </div>
+          <div className="estimate-attachment">
+            <div className="section-subtitle attachment-title" style={{ color: BRAND.ink }}>Attached Estimate Summary</div>
+            <div className="stack-sm top-md">
+              <div className="summary-row">
+                <div className="summary-row-label" style={{ color: BRAND.forest }}>Project type</div>
+                <div className="summary-row-value">{summary.projectType}</div>
+              </div>
+              <div className="summary-row">
+                <div className="summary-row-label" style={{ color: BRAND.forest }}>Finish level</div>
+                <div className="summary-row-value">{summary.finishLevel}</div>
+              </div>
+              <div className="summary-row">
+                <div className="summary-row-label" style={{ color: BRAND.forest }}>Estimated range</div>
+                <div className="summary-row-value">{summary.estimatedRange}</div>
+              </div>
+              <div className="summary-row">
+                <div className="summary-row-label" style={{ color: BRAND.forest }}>Selections included</div>
+                <div className="summary-row-value">{summary.selections.length}</div>
+              </div>
+            </div>
+          </div>
+          {error ? <div className="status-box status-error">{error}</div> : null}
+          {success ? <div className="status-box status-success">{success}</div> : null}
+          <div className="modal-actions">
+            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="submit" className="text-white" style={{ backgroundColor: BRAND.ink }} disabled={submitting}>
+              {submitting ? <><Loader2 className="icon-inline spin" /> Saving...</> : 'Submit Request'}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   )
