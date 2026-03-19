@@ -7,7 +7,9 @@ A Vite + React estimator that guides users through project questions and generat
 Copy `.env.example` to `.env` if you need custom client variables.
 
 Optional:
-- `VITE_API_BASE_URL` if you want the front-end to point at a custom backend.
+- `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for the included `/api/consultation-requests` server endpoint.
+- `VITE_API_BASE_URL` if you want the front-end to submit through a custom backend endpoint instead of same-origin `/api`.
+- `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for direct client-side fallback when API endpoints are unavailable.
 
 ## Run locally
 
