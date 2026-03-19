@@ -7,7 +7,9 @@ A Vite + React estimator that guides users through project questions and generat
 Copy `.env.example` to `.env` if you need custom client variables.
 
 Optional:
-- `VITE_API_BASE_URL` if you want the front-end to point at a custom backend.
+- `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for the included `/api/consultation-requests` server endpoint (`SUPABASE_ANON_KEY` can be used as a fallback key if needed).
+- `VITE_API_BASE_URL` if you want the front-end to submit through a custom backend endpoint instead of same-origin `/api`.
+- `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to override the built-in default Supabase project used by the consultation form fallback.
 
 ## Run locally
 
