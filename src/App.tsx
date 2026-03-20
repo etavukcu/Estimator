@@ -924,6 +924,25 @@ export default function App() {
   function next() { if (canContinue()) setStep((s) => Math.min(s + 1, stages.length - 1)) }
   function back() { setStep((s) => Math.max(s - 1, 0)) }
   function start() { setStep(1) }
+  function startOver() {
+    setStep(0)
+    setProjectId('')
+    setTier('')
+    setAnswers({})
+    setLead({ fullName: '', email: '', phone: '', notes: '' })
+    setConsultationOpen(false)
+    setConsultationError('')
+    setConsultationSuccess('')
+    setConsultationSubmitting(false)
+    setConsultationForm({
+      fullName: '',
+      phone: '',
+      email: '',
+      preferredCallbackTime: '',
+      projectAddress: '',
+      notes: '',
+    })
+  }
 
   function resetAnswersForTier(nextTier: string) {
     if (!project) return {}
@@ -1350,6 +1369,14 @@ export default function App() {
                 Continue <ArrowRight className="icon-inline" />
               </Button>
             )}
+          </div>
+        ) : null}
+
+        {step > 0 ? (
+          <div className="top-md center">
+            <Button variant="outline" onClick={startOver} style={{ borderColor: BRAND.sage, color: BRAND.ink }}>
+              Start Over
+            </Button>
           </div>
         ) : null}
       </div>
