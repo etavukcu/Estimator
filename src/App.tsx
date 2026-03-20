@@ -93,104 +93,147 @@ const PROJECTS: Project[] = [
     id: 'kitchen',
     name: 'Kitchen Remodel',
     icon: ChefHat,
-    description: 'Cabinetry, countertops, layout updates, appliances, and finishes.',
-    baseRanges: { good: [35000, 55000], better: [55000, 85000], best: [85000, 150000] },
+    description: 'Size, layout, cabinetry, surfaces, appliances, and kitchen finishes.',
+    baseRanges: { good: [0, 0], better: [0, 0], best: [0, 0] },
     sections: [
       {
-        title: 'Scope',
+        title: 'Kitchen Size',
         questions: [
           {
             id: 'size',
-            label: 'What size is your kitchen?',
+            label: 'What is the approximate size of your kitchen?',
             options: [
-              { value: 'small', label: 'Small', helper: 'Under 150 sq ft', adj: [0, 0] },
-              { value: 'medium', label: 'Medium', helper: '150-250 sq ft', adj: [8000, 12000] },
-              { value: 'large', label: 'Large', helper: '250+ sq ft', adj: [15000, 25000] },
+              { value: 'under_100', label: 'Under 100 sqft', adj: [0, 0] },
+              { value: '100_150', label: '100 – 150 sqft', adj: [0, 0] },
+              { value: '150_250', label: '150 – 250 sqft', adj: [0, 0] },
+              { value: '250_400', label: '250 – 400 sqft', adj: [0, 0] },
+              { value: '400_plus', label: '400+ sqft', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', adj: [0, 0] },
             ],
           },
+        ],
+      },
+      {
+        title: 'Layout',
+        questions: [
           {
             id: 'layout',
-            label: 'Will the layout stay the same?',
+            label: 'Are you planning to change the layout?',
             options: [
-              { value: 'same', label: 'Keep layout', adj: [0, 0] },
-              { value: 'minor', label: 'Minor changes', adj: [5000, 10000] },
-              { value: 'major', label: 'Major layout change', adj: [15000, 30000] },
+              { value: 'keep', label: 'Keep existing layout', adj: [0, 0] },
+              { value: 'minor', label: 'Minor changes (move appliances/plumbing slightly)', adj: [0, 0] },
+              { value: 'full', label: 'Full redesign', adj: [0, 0] },
             ],
           },
         ],
       },
       {
-        title: 'Cabinetry',
+        title: 'Cabinets',
         questions: [
           {
-            id: 'cabinetType',
-            label: 'What cabinet type are you considering?',
+            id: 'cabinets',
+            label: 'What type of cabinets are you considering?',
             options: [
-              { value: 'stock', label: 'Stock', adj: [5000, 10000], tiers: ['good'] },
-              { value: 'semi', label: 'Semi-custom', adj: [12000, 25000], tiers: ['good', 'better'] },
-              { value: 'custom', label: 'Custom', adj: [30000, 70000], tiers: ['better', 'best'] },
-            ],
-          },
-          {
-            id: 'cabinetMaterial',
-            label: 'What cabinet material or finish do you want?',
-            options: [
-              { value: 'mdf', label: 'MDF Painted', adj: [0, 1500], tiers: ['good'] },
-              { value: 'paint', label: 'Paint Grade', adj: [0, 3000], tiers: ['good', 'better'] },
-              { value: 'maple', label: 'Maple', adj: [2000, 4000], tiers: ['better'] },
-              { value: 'oak', label: 'White Oak', adj: [6000, 12000], tiers: ['better', 'best'] },
-              { value: 'walnut', label: 'Walnut', adj: [10000, 20000], tiers: ['best'] },
+              { value: 'refinish', label: 'Refinish existing', adj: [0, 0] },
+              { value: 'stock', label: 'Stock cabinets', adj: [0, 0] },
+              { value: 'semi_custom', label: 'Semi-custom cabinets', adj: [0, 0] },
+              { value: 'custom', label: 'Custom cabinets', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', adj: [0, 0] },
             ],
           },
         ],
       },
       {
-        title: 'Surfaces',
+        title: 'Countertops',
         questions: [
           {
-            id: 'countertop',
-            label: 'What countertop material are you considering?',
+            id: 'countertops',
+            label: 'What countertop material do you prefer?',
             options: [
-              { value: 'laminate', label: 'Laminate', adj: [0, 0], tiers: ['good'] },
-              { value: 'butcher', label: 'Butcher Block', adj: [2000, 4000], tiers: ['good'] },
-              { value: 'entryQuartz', label: 'Entry Quartz', adj: [4000, 7000], tiers: ['good', 'better'] },
-              { value: 'quartz', label: 'Quartz', adj: [4000, 8000], tiers: ['better', 'best'] },
-              { value: 'granite', label: 'Granite', adj: [5000, 9000], tiers: ['better', 'best'] },
-              { value: 'quartzite', label: 'Quartzite', adj: [10000, 20000], tiers: ['best'] },
-              { value: 'marble', label: 'Marble', adj: [10000, 20000], tiers: ['best'] },
-            ],
-          },
-          {
-            id: 'backsplash',
-            label: 'Would you like a backsplash upgrade?',
-            options: [
-              { value: 'none', label: 'No backsplash', adj: [0, 0] },
-              { value: 'standard', label: 'Standard tile', adj: [2000, 4000] },
-              { value: 'custom', label: 'Custom tile', adj: [5000, 10000] },
-            ],
-          },
-          {
-            id: 'flooring',
-            label: 'What flooring scope should we include?',
-            options: [
-              { value: 'existing', label: 'Keep existing', adj: [0, 0] },
-              { value: 'lvp', label: 'LVP / Laminate', adj: [3000, 6000], tiers: ['good', 'better'] },
-              { value: 'tile', label: 'Tile', adj: [6000, 12000], tiers: ['better', 'best'] },
-              { value: 'hardwood', label: 'Hardwood', adj: [8000, 15000], tiers: ['better', 'best'] },
+              { value: 'laminate', label: 'Laminate', adj: [0, 0] },
+              { value: 'quartz', label: 'Quartz', adj: [0, 0] },
+              { value: 'granite', label: 'Granite', adj: [0, 0] },
+              { value: 'marble', label: 'Marble / premium stone', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', adj: [0, 0] },
             ],
           },
         ],
       },
       {
-        title: 'Appliances & Extras',
+        title: 'Appliances',
         questions: [
           {
             id: 'appliances',
-            label: 'Should appliances be included?',
+            label: 'What are you planning for appliances?',
             options: [
-              { value: 'none', label: 'No appliances', adj: [0, 0] },
-              { value: 'standard', label: 'Standard package', adj: [5000, 8000], tiers: ['good', 'better'] },
-              { value: 'premium', label: 'Premium package', adj: [12000, 25000], tiers: ['better', 'best'] },
+              { value: 'keep', label: 'Keep existing', adj: [0, 0] },
+              { value: 'standard', label: 'Replace with standard appliances', adj: [0, 0] },
+              { value: 'premium', label: 'Upgrade to premium appliances', adj: [0, 0] },
+              { value: 'luxury', label: 'High-end / luxury appliances', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', adj: [0, 0] },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Flooring',
+        questions: [
+          {
+            id: 'flooring',
+            label: 'What flooring will you have in the kitchen?',
+            options: [
+              { value: 'keep', label: 'Keep existing', adj: [0, 0] },
+              { value: 'lvp', label: 'LVP / laminate', adj: [0, 0] },
+              { value: 'tile', label: 'Tile', adj: [0, 0] },
+              { value: 'hardwood', label: 'Hardwood', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', adj: [0, 0] },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Backsplash',
+        questions: [
+          {
+            id: 'backsplash',
+            label: 'What type of backsplash are you considering?',
+            options: [
+              { value: 'none', label: 'No backsplash', adj: [0, 0] },
+              { value: 'standard', label: 'Standard tile backsplash', adj: [0, 0] },
+              { value: 'upgraded', label: 'Upgraded / decorative tile', adj: [0, 0] },
+              { value: 'full', label: 'Full-height or custom backsplash', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', adj: [0, 0] },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Island',
+        questions: [
+          {
+            id: 'island',
+            label: 'Do you want to add or upgrade a kitchen island?',
+            options: [
+              { value: 'none', label: 'No island', adj: [0, 0] },
+              { value: 'keep', label: 'Keep existing island', adj: [0, 0] },
+              { value: 'add', label: 'Add a new island', adj: [0, 0] },
+              { value: 'upgrade', label: 'Larger or upgraded island', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', adj: [0, 0] },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Lighting',
+        questions: [
+          {
+            id: 'lighting',
+            label: 'What type of lighting do you want?',
+            options: [
+              { value: 'basic', label: 'Basic lighting', adj: [0, 0] },
+              { value: 'recessed', label: 'Recessed lighting', adj: [0, 0] },
+              { value: 'designer', label: 'Designer / layered lighting', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', adj: [0, 0] },
             ],
           },
         ],
@@ -410,23 +453,150 @@ function getProject(projectId: string) {
   return PROJECTS.find((p) => p.id === projectId)
 }
 
+const kitchenPricing = {
+  sizeMap: {
+    under_100: 90,
+    '100_150': 125,
+    '150_250': 200,
+    '250_400': 325,
+    '400_plus': 450,
+    not_sure: 200,
+  },
+  pricePerSqft: {
+    good: [190, 235],
+    better: [235, 295],
+    best: [295, 365],
+  },
+  layout: {
+    keep: { score: 1, adjustment: 0 },
+    minor: { score: 2, adjustment: 5000 },
+    full: { score: 3, adjustment: 12000 },
+  },
+  cabinets: {
+    refinish: { score: 1, adjustment: -3000 },
+    stock: { score: 1, adjustment: 0 },
+    semi_custom: { score: 2, adjustment: 4000 },
+    custom: { score: 3, adjustment: 10000 },
+    not_sure: { score: 2, adjustment: 2000 },
+  },
+  countertops: {
+    laminate: { score: 1, adjustment: -2000 },
+    quartz: { score: 2, adjustment: 1500 },
+    granite: { score: 2, adjustment: 2500 },
+    marble: { score: 3, adjustment: 6000 },
+    not_sure: { score: 2, adjustment: 1500 },
+  },
+  appliances: {
+    keep: { score: 1, adjustment: -4000 },
+    standard: { score: 1, adjustment: 0 },
+    premium: { score: 2, adjustment: 4000 },
+    luxury: { score: 3, adjustment: 9000 },
+    not_sure: { score: 2, adjustment: 2000 },
+  },
+  flooring: {
+    keep: { score: 1, adjustment: -2000 },
+    lvp: { score: 1, adjustment: 0 },
+    tile: { score: 2, adjustment: 2000 },
+    hardwood: { score: 3, adjustment: 5000 },
+    not_sure: { score: 2, adjustment: 1500 },
+  },
+  backsplash: {
+    none: { score: 1, adjustment: -1000 },
+    standard: { score: 1, adjustment: 0 },
+    upgraded: { score: 2, adjustment: 1500 },
+    full: { score: 3, adjustment: 4000 },
+    not_sure: { score: 2, adjustment: 1000 },
+  },
+  island: {
+    none: { score: 1, adjustment: 0 },
+    keep: { score: 1, adjustment: 0 },
+    add: { score: 2, adjustment: 4000 },
+    upgrade: { score: 3, adjustment: 8000 },
+    not_sure: { score: 2, adjustment: 3000 },
+  },
+  lighting: {
+    basic: { score: 1, adjustment: 0 },
+    recessed: { score: 2, adjustment: 2000 },
+    designer: { score: 3, adjustment: 5000 },
+    not_sure: { score: 2, adjustment: 1500 },
+  },
+} as const
+
+const kitchenScoredCategories = ['layout', 'cabinets', 'countertops', 'appliances', 'flooring', 'backsplash', 'island', 'lighting'] as const
+
+const kitchenSectionIcons: Record<string, string> = {
+  Layout: '🧭',
+  Cabinets: '🗄️',
+  Countertops: '🪨',
+  Appliances: '🍳',
+  Flooring: '🧱',
+  Backsplash: '🧩',
+  Island: '🏝️',
+  Lighting: '💡',
+}
+
 function getFilteredOptions(question: Question, tier: string) {
   return (question.options || []).filter((option) => !option.tiers || option.tiers.includes(tier as TierKey))
 }
 
 function getAllQuestions(project: Project | undefined, tier: string) {
-  if (!project?.sections || !tier) return [] as (Question & { sectionTitle: string })[]
+  if (!project?.sections) return [] as (Question & { sectionTitle: string })[]
+  if (project.id !== 'kitchen' && !tier) return [] as (Question & { sectionTitle: string })[]
   return project.sections.flatMap((section) =>
     section.questions.map((question) => ({
       ...question,
       sectionTitle: section.title,
-      options: getFilteredOptions(question, tier),
+      options: project.id === 'kitchen' ? question.options : getFilteredOptions(question, tier),
     }))
   )
 }
 
+function inferKitchenTier(answers: Record<string, string>): TierKey {
+  const totalScore = kitchenScoredCategories.reduce((total, category) => {
+    const value = answers[category] as keyof (typeof kitchenPricing)[typeof category]
+    const option = kitchenPricing[category][value] || kitchenPricing[category].not_sure || kitchenPricing[category].keep
+    return total + option.score
+  }, 0)
+  const avgScore = totalScore / kitchenScoredCategories.length
+  if (avgScore < 1.5) return 'good'
+  if (avgScore < 2.25) return 'better'
+  return 'best'
+}
+
+function roundPresentation(value: number) {
+  return Math.round(value / 500) * 500
+}
+
 function calculateEstimate(project: Project | undefined, tier: string, answers: Record<string, string>) {
-  if (!project || !tier) return null
+  if (!project) return null
+  if (project.id === 'kitchen') {
+    const kitchenTier = inferKitchenTier(answers)
+    const sizeKey = (answers.size as keyof typeof kitchenPricing.sizeMap) || 'not_sure'
+    const sqft = kitchenPricing.sizeMap[sizeKey] || kitchenPricing.sizeMap.not_sure
+    const [minPsf, maxPsf] = kitchenPricing.pricePerSqft[kitchenTier]
+    const baseLow = sqft * minPsf
+    const baseHigh = sqft * maxPsf
+    const adjustments = kitchenScoredCategories.reduce((total, category) => {
+      const value = answers[category] as keyof (typeof kitchenPricing)[typeof category]
+      const option = kitchenPricing[category][value] || kitchenPricing[category].not_sure || kitchenPricing[category].keep
+      return total + option.adjustment
+    }, 0)
+    const rawLow = baseLow + adjustments
+    const rawHigh = baseHigh + adjustments
+    const mid = (rawLow + rawHigh) / 2
+    const finalLow = roundPresentation(mid * 0.9)
+    const finalHigh = roundPresentation(mid * 1.1)
+    const summary: Array<{ section: string; question: string; answer: string }> = []
+    for (const question of getAllQuestions(project, kitchenTier)) {
+      const value = answers[question.id]
+      if (!value) continue
+      const option = question.options.find((o) => o.value === value)
+      if (!option) continue
+      summary.push({ section: question.sectionTitle, question: question.label, answer: option.label })
+    }
+    return { low: finalLow, high: Math.max(finalHigh, finalLow + 500), summary, inferredTier: kitchenTier }
+  }
+  if (!tier) return null
   const [baseLow, baseHigh] = project.baseRanges[tier as TierKey] || [0, 0]
   let low = baseLow
   let high = baseHigh
@@ -442,13 +612,14 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
     summary.push({ section: question.sectionTitle, question: question.label, answer: option.label })
   }
 
-  return { low, high, summary }
+  return { low, high, summary, inferredTier: tier as TierKey }
 }
 
 function buildEstimateSummary(project: Project | undefined, tier: string, estimate: ReturnType<typeof calculateEstimate>, leadName: string): EstimateSummary {
+  const inferredTier = estimate?.inferredTier || (tier as TierKey)
   return {
     projectType: project?.name || 'Not selected',
-    finishLevel: tier ? TIERS[tier as TierKey].label : 'Not selected',
+    finishLevel: inferredTier ? TIERS[inferredTier].label : 'Not selected',
     estimatedRange: estimate ? rangeToText([estimate.low, estimate.high]) : 'Not available',
     selections: estimate?.summary || [],
     preparedFor: leadName || 'Prospective Client',
@@ -458,6 +629,7 @@ function buildEstimateSummary(project: Project | undefined, tier: string, estima
 function runEstimatorSmokeTests() {
   console.assert(rangeToText([1000, 2000]) === '$1,000 - $2,000', 'rangeToText should format a currency range')
   console.assert(getProject('kitchen')?.name === 'Kitchen Remodel', 'getProject should find kitchen project')
+  console.assert(inferKitchenTier({ layout: 'keep', cabinets: 'stock', countertops: 'laminate', appliances: 'standard', flooring: 'lvp', backsplash: 'standard', island: 'none', lighting: 'basic' }) === 'good', 'kitchen tier should infer as good for value selections')
   const goodQuestions = getAllQuestions(getProject('bathroom'), 'good')
   const wetArea = goodQuestions.find((q) => q.id === 'showerTub')?.options.map((o) => o.value) || []
   console.assert(wetArea.includes('alcoveShower'), 'good bathroom tier should include alcove shower')
@@ -551,13 +723,15 @@ export default function App() {
   const [consultationSubmitting, setConsultationSubmitting] = useState(false)
 
   const project = useMemo(() => getProject(projectId), [projectId])
+  const requiresTierSelection = project ? project.id !== 'kitchen' : true
+  const activeTier = requiresTierSelection ? tier : inferKitchenTier(answers)
   const activeQuestions = useMemo(() => getAllQuestions(project, tier), [project, tier])
   const estimate = useMemo(() => calculateEstimate(project, tier, answers), [project, tier, answers])
   const estimateSummary = useMemo(
     () => buildEstimateSummary(project, tier, estimate, lead.fullName.trim()),
     [project, tier, estimate, lead.fullName]
   )
-  const stages = ['welcome', 'project', 'tier', ...activeQuestions.map((q) => q.id), 'lead', 'results']
+  const stages = ['welcome', 'project', ...(requiresTierSelection ? ['tier'] : []), ...activeQuestions.map((q) => q.id), 'lead', 'results']
   const currentStage = stages[step] || 'welcome'
   const currentQuestion = activeQuestions.find((q) => q.id === currentStage)
   const progress = Math.round((step / Math.max(stages.length - 1, 1)) * 100)
@@ -565,7 +739,7 @@ export default function App() {
   function canContinue() {
     if (currentStage === 'welcome') return true
     if (currentStage === 'project') return Boolean(projectId)
-    if (currentStage === 'tier') return Boolean(tier)
+    if (currentStage === 'tier') return requiresTierSelection ? Boolean(tier) : true
     if (currentQuestion) return Boolean(answers[currentQuestion.id])
     if (currentStage === 'lead') return Boolean(lead.fullName.trim() && lead.email.trim() && lead.phone.trim())
     return true
@@ -667,7 +841,7 @@ export default function App() {
   }
 
   function downloadPdf() {
-    if (!project || !tier || !estimate) return
+    if (!project || !activeTier || !estimate) return
     const pdf = new jsPDF({ unit: 'pt', format: 'letter' })
     const marginX = 48
     let y = 52
@@ -701,7 +875,7 @@ export default function App() {
     pdf.setFont('helvetica', 'normal')
     pdf.setFontSize(11)
     pdf.text(`Project type: ${project.name}`, marginX + 16, y + 42)
-    pdf.text(`Selected tier: ${TIERS[tier as TierKey].label}`, marginX + 16, y + 58)
+    pdf.text(`${project.id === 'kitchen' ? 'Inferred tier' : 'Selected tier'}: ${TIERS[activeTier as TierKey].label}`, marginX + 16, y + 58)
     pdf.text('Phone: 423-777-6849', marginX + 16, y + 74)
     pdf.setTextColor(54, 93, 135)
     pdf.setFont('helvetica', 'bold')
@@ -736,9 +910,9 @@ export default function App() {
     <div className="layout-two">
       <Card style={{ backgroundColor: 'white' }}>
         <div className="card-pad-lg">
-          <div className="feature-chip" style={{ backgroundColor: BRAND.sand, color: BRAND.ink }}>Good • Better • Best pricing paths</div>
+          <div className="feature-chip" style={{ backgroundColor: BRAND.sand, color: BRAND.ink }}>Guided scope-based pricing paths</div>
           <h2 className="hero-title" style={{ color: BRAND.ink }}>Get a planning range for your remodel.</h2>
-          <p className="hero-copy">Answer a few guided questions and receive a tailored project range based on your project type, finish level, and selections.</p>
+          <p className="hero-copy">Answer a few guided questions and receive a tailored project range based on your project type and selections.</p>
           <div className="grid-three">
             {['Tailored to your selections', 'Designed around realistic finish levels', 'Download PDF Summary'].map((item) => (
               <div key={item} className="feature-box" style={{ backgroundColor: BRAND.sand, color: BRAND.ink }}>{item}</div>
@@ -754,7 +928,7 @@ export default function App() {
         <div className="card-pad-lg">
           <div className="kicker light">How it works</div>
           <div className="stack-lg top-lg">
-            {['Choose your project type', 'Select Good, Better, or Best', 'Answer dynamic project questions', 'Enter contact details', 'Download your PDF summary'].map((item, index) => (
+            {['Choose your project type', 'Answer guided project questions', 'We infer the project tier', 'Enter contact details', 'Download your PDF summary'].map((item, index) => (
               <div key={item} className="row-gap">
                 <div className="step-bubble">{index + 1}</div>
                 <div className="light-copy">{item}</div>
@@ -814,9 +988,12 @@ export default function App() {
   const questionStep = currentQuestion ? (
     <Card>
       <div className="card-pad">
-        <div className="kicker" style={{ color: BRAND.forest }}>{currentQuestion.sectionTitle}</div>
+        <div className="kicker" style={{ color: BRAND.forest }}>
+          {project?.id === 'kitchen' && kitchenSectionIcons[currentQuestion.sectionTitle] ? `${kitchenSectionIcons[currentQuestion.sectionTitle]} ` : ''}
+          {currentQuestion.sectionTitle}
+        </div>
         <div className="section-title top-sm" style={{ color: BRAND.ink }}>{currentQuestion.label}</div>
-        <div className="section-copy">Your selected tier filters the options shown below.</div>
+        <div className="section-copy">{project?.id === 'kitchen' ? 'Select the option that best matches your planned scope.' : 'Your selected tier filters the options shown below.'}</div>
         <div className="top-lg">
           <OptionCards
             question={currentQuestion}
@@ -850,7 +1027,7 @@ export default function App() {
           <div className="kicker light">Estimate preview</div>
           <div className="stack-md top-lg">
             <InfoBlock label="Project" value={project?.name || '-'} />
-            <InfoBlock label="Selected tier" value={tier ? TIERS[tier as TierKey].label : '-'} pill />
+            <InfoBlock label={project?.id === 'kitchen' ? 'Inferred tier' : 'Selected tier'} value={activeTier ? TIERS[activeTier as TierKey].label : '-'} pill />
             <InfoBlock label="Current planning range" value={estimate ? rangeToText([estimate.low, estimate.high]) : '-'} range />
           </div>
           <div className="info-box top-xl">When you continue, we'll generate your planning range and downloadable PDF summary.</div>
@@ -859,16 +1036,19 @@ export default function App() {
     </div>
   )
 
-  const resultsStep = estimate && project && tier ? (
+  const resultsStep = estimate && project && activeTier ? (
     <div className="layout-two-results">
       <Card>
         <div className="card-pad">
           <div className="kicker" style={{ color: BRAND.forest }}>Your Planning Range</div>
-          <div className="range-title" style={{ backgroundColor: BRAND.ink, color: 'white' }}>{rangeToText([estimate.low, estimate.high])}</div>
-          <div className="section-copy">Based on your selected scope, finish level, and project type.</div>
+          <div className="range-title" style={{ backgroundColor: BRAND.ink, color: 'white' }}>
+            {project.id === 'kitchen' ? `Estimated Kitchen Remodel: ${rangeToText([estimate.low, estimate.high])}` : rangeToText([estimate.low, estimate.high])}
+          </div>
+          <div className="section-copy">{project.id === 'kitchen' ? 'Based on similar kitchen projects and your selections' : 'Based on your selected scope, finish level, and project type.'}</div>
+          {project.id === 'kitchen' ? <div className="section-copy">Most homeowners spend around {currency((estimate.low + estimate.high) / 2)} for a kitchen like this</div> : null}
           <div className="grid-three top-lg">
             <SummaryPill label="Project type" value={project.name} />
-            <SummaryPill label="Selected tier" value={TIERS[tier as TierKey].label} highlight />
+            <SummaryPill label={project.id === 'kitchen' ? 'Inferred tier' : 'Selected tier'} value={TIERS[activeTier as TierKey].label} highlight />
             <SummaryPill label="Prepared for" value={lead.fullName || 'Prospective Client'} />
           </div>
           <div className="top-xl">
