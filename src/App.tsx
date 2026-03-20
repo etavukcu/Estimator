@@ -272,6 +272,7 @@ const PROJECTS: Project[] = [
               { value: '40_80', label: '40–80 sq ft', adj: [0, 0] },
               { value: '80_120', label: '80–120 sq ft', adj: [0, 0] },
               { value: '120_plus', label: '120+ sq ft', adj: [0, 0] },
+              { value: 'not_sure_estimate', label: 'Not sure — estimate for me', adj: [0, 0] },
             ],
           },
         ],
@@ -286,6 +287,7 @@ const PROJECTS: Project[] = [
               { value: 'none', label: 'No changes (same layout)', adj: [0, 0] },
               { value: 'minor', label: 'Minor changes', adj: [0, 0] },
               { value: 'major', label: 'Major changes', adj: [0, 0] },
+              { value: 'not_sure_estimate', label: 'Not sure — estimate for me', adj: [0, 0] },
             ],
           },
         ],
@@ -301,6 +303,8 @@ const PROJECTS: Project[] = [
               { value: 'standard_replacement', label: 'Standard tub or shower replacement', adj: [0, 0] },
               { value: 'walk_in_tiled', label: 'Walk-in tiled shower', adj: [0, 0] },
               { value: 'luxury_custom', label: 'Luxury custom shower', adj: [0, 0] },
+              { value: 'not_sure_estimate', label: 'Not sure — estimate for me', adj: [0, 0] },
+              { value: 'other_custom_setup', label: 'Other / custom setup', adj: [0, 0] },
             ],
           },
         ],
@@ -315,6 +319,8 @@ const PROJECTS: Project[] = [
               { value: 'basic_prefab', label: 'Basic prefab vanity', adj: [0, 0] },
               { value: 'semi_custom', label: 'Semi-custom vanity', adj: [0, 0] },
               { value: 'custom_double', label: 'Custom vanity / double vanity', adj: [0, 0] },
+              { value: 'not_sure_estimate', label: 'Not sure — estimate for me', adj: [0, 0] },
+              { value: 'other', label: 'Other', adj: [0, 0] },
             ],
           },
         ],
@@ -330,6 +336,7 @@ const PROJECTS: Project[] = [
               { value: 'standard', label: 'Standard (floor + shower walls)', adj: [0, 0] },
               { value: 'full', label: 'Full (floor + shower + accent areas)', adj: [0, 0] },
               { value: 'luxury', label: 'Luxury detailed tile work', adj: [0, 0] },
+              { value: 'not_sure_estimate', label: 'Not sure — estimate for me', adj: [0, 0] },
             ],
           },
         ],
@@ -345,6 +352,7 @@ const PROJECTS: Project[] = [
               { value: 'standard', label: 'Standard / Builder Grade', adj: [0, 0] },
               { value: 'mid_range', label: 'Mid-Range Upgrade', adj: [0, 0] },
               { value: 'high_end', label: 'High-End / Luxury', adj: [0, 0] },
+              { value: 'not_sure_estimate', label: 'Not sure — estimate for me', adj: [0, 0] },
             ],
           },
         ],
@@ -570,34 +578,42 @@ const bathroomPricing = {
     '40_80': [1, 1],
     '80_120': [1.1, 1.1],
     '120_plus': [1.2, 1.2],
+    not_sure_estimate: [1, 1.1],
   },
   layoutAdjustments: {
     none: [0, 0],
     minor: [2000, 5000],
     major: [6000, 12000],
+    not_sure_estimate: [2000, 8000],
   },
   showerTubAdjustments: {
     refresh: [0, 0],
     standard_replacement: [2000, 5000],
     walk_in_tiled: [6000, 12000],
     luxury_custom: [12000, 25000],
+    not_sure_estimate: [4000, 12000],
+    other_custom_setup: [12000, 22000],
   },
   vanityAdjustments: {
     basic_prefab: [500, 1500],
     semi_custom: [2000, 5000],
     custom_double: [5000, 12000],
+    not_sure_estimate: [2000, 5000],
+    other: [5000, 10000],
   },
   tileAdjustments: {
     minimal: [1000, 3000],
     standard: [4000, 8000],
     full: [8000, 15000],
     luxury: [15000, 30000],
+    not_sure_estimate: [4000, 12000],
   },
   finishWeighting: {
     budget: { min: 0.92, max: 0.96, spread: 0.11 },
     standard: { min: 0.96, max: 1, spread: 0.13 },
     mid_range: { min: 1.01, max: 1.05, spread: 0.15 },
     high_end: { min: 1.05, max: 1.1, spread: 0.12 },
+    not_sure_estimate: { min: 0.99, max: 1.03, spread: 0.14 },
   },
 } as const
 
@@ -634,9 +650,11 @@ function inferBathroomTier(answers: Record<string, string>): TierKey {
     none: 0,
     minor: 1,
     major: 2,
+    not_sure_estimate: 1,
     basic_prefab: 0,
     semi_custom: 1,
     custom_double: 2,
+    other: 2,
     minimal: 0,
     standard: 1,
     full: 2,
@@ -645,6 +663,7 @@ function inferBathroomTier(answers: Record<string, string>): TierKey {
     standard_replacement: 0,
     walk_in_tiled: 1,
     luxury_custom: 2,
+    other_custom_setup: 2,
     budget: 0,
     mid_range: 1,
     high_end: 2,
@@ -678,6 +697,23 @@ function getBathroomAdjustmentValue(
 ) {
   if (key && map[key]) return map[key]
   return map[fallback]
+}
+
+function hasBathroomFallbackSelections(answers: Record<string, string>) {
+  return [answers.bathroomSize, answers.bathLayout, answers.showerTub, answers.vanity, answers.tile, answers.finishLevel].some(
+    (value) => value === 'not_sure_estimate' || value === 'other_custom_setup' || value === 'other'
+  )
+}
+
+function getBathroomSummaryLabel(questionId: string, answerValue: string, optionLabel: string) {
+  if (answerValue !== 'not_sure_estimate' && answerValue !== 'other_custom_setup' && answerValue !== 'other') return optionLabel
+  if (answerValue === 'not_sure_estimate') {
+    if (questionId === 'bathroomSize') return 'Estimated based on typical scope'
+    return 'Allowance included (estimated based on typical scope)'
+  }
+  if (questionId === 'showerTub' && answerValue === 'other_custom_setup') return 'Custom shower/tub allowance included'
+  if (questionId === 'vanity' && answerValue === 'other') return 'Custom vanity allowance included'
+  return optionLabel
 }
 
 function calculateEstimate(project: Project | undefined, tier: string, answers: Record<string, string>) {
@@ -747,7 +783,7 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
       if (!value) continue
       const option = question.options.find((o) => o.value === value)
       if (!option) continue
-      summary.push({ section: question.sectionTitle, question: question.label, answer: option.label })
+      summary.push({ section: question.sectionTitle, question: question.label, answer: getBathroomSummaryLabel(question.id, value, option.label) })
     }
     const minimumBathroomStartPrice = 15000
     const adjustedLow = Math.max(finalLow, minimumBathroomStartPrice)
@@ -789,9 +825,12 @@ function runEstimatorSmokeTests() {
   console.assert(getProject('kitchen')?.name === 'Kitchen Remodel', 'getProject should find kitchen project')
   console.assert(inferKitchenTier({ layout: 'keep', cabinets: 'stock', countertops: 'laminate', appliances: 'standard', flooring: 'lvp', backsplash: 'standard', island: 'none', lighting: 'basic' }) === 'good', 'kitchen tier should infer as good for value selections')
   console.assert(inferBathroomTier({ bathLayout: 'none', vanity: 'basic_prefab', tile: 'minimal', showerTub: 'refresh', finishLevel: 'budget' }) === 'good', 'bathroom tier should infer as good for value selections')
+  console.assert(inferBathroomTier({ bathLayout: 'not_sure_estimate', vanity: 'not_sure_estimate', tile: 'not_sure_estimate', showerTub: 'not_sure_estimate', finishLevel: 'not_sure_estimate' }) === 'better', 'bathroom tier should infer as better for uncertain selections')
+  console.assert(inferBathroomTier({ bathLayout: 'major', vanity: 'other', tile: 'luxury', showerTub: 'other_custom_setup', finishLevel: 'high_end' }) === 'best', 'bathroom tier should infer as best for custom/high-end selections')
   const bathroomQuestions = getAllQuestions(getProject('bathroom'), '')
   const showerOptions = bathroomQuestions.find((q) => q.id === 'showerTub')?.options.map((o) => o.value) || []
   console.assert(showerOptions.includes('walk_in_tiled'), 'bathroom options should include walk-in tiled shower')
+  console.assert(showerOptions.includes('not_sure_estimate') && showerOptions.includes('other_custom_setup'), 'bathroom options should include shower fallback options')
 }
 
 runEstimatorSmokeTests()
@@ -910,6 +949,9 @@ export default function App() {
     () => buildEstimateSummary(project, tier, estimate, lead.fullName.trim()),
     [project, tier, estimate, lead.fullName]
   )
+  const bathroomHasFallbackSelections = useMemo(() => hasBathroomFallbackSelections(answers), [answers])
+  const bathroomConfidenceMessage = 'This estimate is based on your bathroom type, layout complexity, fixture selections, and finish level. Most projects with similar selections fall within this range, excluding hidden conditions or structural repairs.'
+  const bathroomFallbackConfidenceMessage = 'This estimate is based on your bathroom type, layout complexity, fixture selections, and finish level. Where selections were marked as unsure or custom, we used reasonable planning assumptions to keep the estimate realistic. Final pricing may vary once exact materials and scope are confirmed.'
   const stages = ['welcome', 'project', ...(requiresTierSelection ? ['tier'] : []), ...activeQuestions.map((q) => q.id), 'lead', 'results']
   const currentStage = stages[step] || 'welcome'
   const currentQuestion = activeQuestions.find((q) => q.id === currentStage)
@@ -1092,7 +1134,15 @@ export default function App() {
     pdf.setFontSize(13)
     pdf.text('Important Note', marginX, y)
     y += 20
-    writeLine('This estimate is a planning range based on the selections above. Final pricing depends on field conditions, structural requirements, measurements, permits, engineering, and material availability.', 11, 16)
+    writeLine(
+      project.id === 'bathroom'
+        ? bathroomHasFallbackSelections
+          ? bathroomFallbackConfidenceMessage
+          : bathroomConfidenceMessage
+        : 'This estimate is a planning range based on the selections above. Final pricing depends on field conditions, structural requirements, measurements, permits, engineering, and material availability.',
+      11,
+      16
+    )
     if (lead.notes) {
       y += 8
       pdf.setFont('helvetica', 'bold')
@@ -1264,7 +1314,9 @@ export default function App() {
             {project.id === 'kitchen'
               ? 'Based on similar kitchen projects and your selections'
               : project.id === 'bathroom'
-                ? 'Based on your bathroom type, layout complexity, fixture selections, and finish level.'
+                ? bathroomHasFallbackSelections
+                  ? bathroomFallbackConfidenceMessage
+                  : 'Based on your bathroom type, layout complexity, fixture selections, and finish level.'
                 : 'Based on your selected scope, finish level, and project type.'}
           </div>
           {project.id === 'kitchen' ? <div className="section-copy">Most homeowners spend around {rangeToText([estimate.low, estimate.high])} for a kitchen like this</div> : null}
@@ -1286,7 +1338,9 @@ export default function App() {
           </div>
           <div className="disclaimer top-xl" style={{ borderColor: BRAND.sand, backgroundColor: BRAND.cream, color: BRAND.forest }}>
             {project.id === 'bathroom'
-              ? 'This estimate is based on your bathroom type, layout complexity, fixture selections, and finish level. Most projects with similar selections fall within this range, excluding hidden conditions or structural repairs.'
+              ? bathroomHasFallbackSelections
+                ? bathroomFallbackConfidenceMessage
+                : bathroomConfidenceMessage
               : 'This estimate is a planning range based on the selections above. Final pricing depends on field conditions, structural requirements, measurements, permits, engineering, and material availability.'}
           </div>
         </div>
