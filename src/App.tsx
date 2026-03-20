@@ -245,85 +245,106 @@ const PROJECTS: Project[] = [
     name: 'Bathroom Remodel',
     icon: Bath,
     description: 'Vanity, tile, shower, tub, fixtures, and layout decisions.',
-    baseRanges: { good: [15000, 25000], better: [25000, 45000], best: [45000, 90000] },
+    baseRanges: { good: [0, 0], better: [0, 0], best: [0, 0] },
     sections: [
       {
         title: 'Bathroom Type',
         questions: [
           {
             id: 'bathroomType',
-            label: 'Which bathroom are you remodeling?',
+            label: 'What type of bathroom remodel are you planning?',
             options: [
-              { value: 'powder', label: 'Powder room', adj: [0, 0] },
-              { value: 'hall', label: 'Hall bath', adj: [5000, 10000] },
-              { value: 'primary', label: 'Primary bath', adj: [15000, 30000] },
-            ],
-          },
-          {
-            id: 'bathLayout',
-            label: 'Will the layout stay the same?',
-            options: [
-              { value: 'same', label: 'Keep layout', adj: [0, 0] },
-              { value: 'minor', label: 'Minor changes', adj: [4000, 8000] },
-              { value: 'major', label: 'Major changes', adj: [12000, 20000] },
+              { value: 'half_bath', label: 'Half Bath (Powder Room)', adj: [0, 0] },
+              { value: 'full_bathroom', label: 'Full Bathroom', adj: [0, 0] },
+              { value: 'primary_bathroom', label: 'Primary Bathroom', adj: [0, 0] },
             ],
           },
         ],
       },
       {
-        title: 'Wet Area',
+        title: 'Bathroom Size',
+        questions: [
+          {
+            id: 'bathroomSize',
+            label: 'What is the approximate size of the bathroom?',
+            options: [
+              { value: 'under_40', label: 'Under 40 sq ft', adj: [0, 0] },
+              { value: '40_80', label: '40–80 sq ft', adj: [0, 0] },
+              { value: '80_120', label: '80–120 sq ft', adj: [0, 0] },
+              { value: '120_plus', label: '120+ sq ft', adj: [0, 0] },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Layout / Plumbing',
+        questions: [
+          {
+            id: 'bathLayout',
+            label: 'Will plumbing or layout change?',
+            options: [
+              { value: 'none', label: 'No changes (same layout)', adj: [0, 0] },
+              { value: 'minor', label: 'Minor changes', adj: [0, 0] },
+              { value: 'major', label: 'Major changes', adj: [0, 0] },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Shower / Tub Scope',
         questions: [
           {
             id: 'showerTub',
-            label: 'What wet-area scope should we include?',
+            label: 'What type of shower or tub work is included?',
             options: [
-              { value: 'tub', label: 'Replace tub', adj: [3000, 6000], tiers: ['good', 'better'] },
-              { value: 'alcoveShower', label: 'Standard alcove shower', adj: [5000, 9000], tiers: ['good', 'better'] },
-              { value: 'fiberglassShower', label: 'Fiberglass shower unit', adj: [4000, 8000], tiers: ['good'] },
-              { value: 'shower', label: 'Walk-in shower', adj: [8000, 15000], tiers: ['better', 'best'] },
-              { value: 'both', label: 'Tub + shower', adj: [12000, 25000], tiers: ['better', 'best'] },
-              { value: 'other', label: 'Other', helper: 'We can discuss a custom wet-area setup.', adj: [6000, 12000] },
-            ],
-          },
-          {
-            id: 'glass',
-            label: 'What shower glass level do you want?',
-            options: [
-              { value: 'framed', label: 'Framed', adj: [1000, 2000], tiers: ['good'] },
-              { value: 'semiFrameless', label: 'Semi-frameless', adj: [1500, 3000], tiers: ['good', 'better'] },
-              { value: 'slider', label: 'Sliding glass door', adj: [1500, 3500], tiers: ['good', 'better'] },
-              { value: 'frameless', label: 'Frameless', adj: [2000, 5000], tiers: ['better', 'best'] },
-              { value: 'custom', label: 'Custom frameless', adj: [6000, 12000], tiers: ['best'] },
-              { value: 'other', label: 'Other', helper: 'We can discuss a custom glass option.', adj: [2000, 5000] },
+              { value: 'refresh', label: 'Keep existing / refresh only', adj: [0, 0] },
+              { value: 'standard_replacement', label: 'Standard tub or shower replacement', adj: [0, 0] },
+              { value: 'walk_in_tiled', label: 'Walk-in tiled shower', adj: [0, 0] },
+              { value: 'luxury_custom', label: 'Luxury custom shower', adj: [0, 0] },
             ],
           },
         ],
       },
       {
-        title: 'Vanity & Finishes',
+        title: 'Vanity Type',
         questions: [
           {
             id: 'vanity',
-            label: 'What vanity level are you considering?',
+            label: 'What type of vanity are you planning?',
             options: [
-              { value: 'stock', label: 'Stock vanity', adj: [2000, 4000], tiers: ['good'] },
-              { value: 'freestanding', label: 'Freestanding vanity', adj: [2500, 4500], tiers: ['good', 'better'] },
-              { value: 'builderDouble', label: 'Builder-grade double vanity', adj: [3500, 6000], tiers: ['good', 'better'] },
-              { value: 'semi', label: 'Semi-custom vanity', adj: [4000, 8000], tiers: ['good', 'better'] },
-              { value: 'custom', label: 'Custom vanity', adj: [10000, 20000], tiers: ['better', 'best'] },
-              { value: 'other', label: 'Other', helper: 'We can discuss a custom vanity style.', adj: [4000, 9000] },
+              { value: 'basic_prefab', label: 'Basic prefab vanity', adj: [0, 0] },
+              { value: 'semi_custom', label: 'Semi-custom vanity', adj: [0, 0] },
+              { value: 'custom_double', label: 'Custom vanity / double vanity', adj: [0, 0] },
             ],
           },
+        ],
+      },
+      {
+        title: 'Tile Coverage',
+        questions: [
           {
             id: 'tile',
-            label: 'What tile level should we include?',
+            label: 'How much tile work is included?',
             options: [
-              { value: 'basic', label: 'Basic tile', adj: [4000, 8000], tiers: ['good'] },
-              { value: 'ceramic', label: 'Ceramic tile', adj: [5000, 9000], tiers: ['good', 'better'] },
-              { value: 'porcelain', label: 'Porcelain tile', adj: [6000, 11000], tiers: ['good', 'better'] },
-              { value: 'mid', label: 'Mid-range tile', adj: [8000, 15000], tiers: ['better'] },
-              { value: 'premium', label: 'Premium tile', adj: [15000, 30000], tiers: ['best'] },
-              { value: 'other', label: 'Other', helper: 'We can discuss another tile selection.', adj: [7000, 14000] },
+              { value: 'minimal', label: 'Minimal (floor only)', adj: [0, 0] },
+              { value: 'standard', label: 'Standard (floor + shower walls)', adj: [0, 0] },
+              { value: 'full', label: 'Full (floor + shower + accent areas)', adj: [0, 0] },
+              { value: 'luxury', label: 'Luxury detailed tile work', adj: [0, 0] },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Finish Level',
+        questions: [
+          {
+            id: 'finishLevel',
+            label: 'What best describes the overall finish level?',
+            options: [
+              { value: 'budget', label: 'Budget / Rental Grade', adj: [0, 0] },
+              { value: 'standard', label: 'Standard / Builder Grade', adj: [0, 0] },
+              { value: 'mid_range', label: 'Mid-Range Upgrade', adj: [0, 0] },
+              { value: 'high_end', label: 'High-End / Luxury', adj: [0, 0] },
             ],
           },
         ],
@@ -536,18 +557,62 @@ const kitchenSectionIcons: Record<string, string> = {
   Lighting: '💡',
 }
 
+const derivedTierProjectIds = new Set(['kitchen', 'bathroom'])
+
+const bathroomPricing = {
+  baseRangeByType: {
+    half_bath: [6000, 12000],
+    full_bathroom: [12000, 22000],
+    primary_bathroom: [20000, 40000],
+  },
+  sizeMultiplier: {
+    under_40: [0.9, 0.9],
+    '40_80': [1, 1],
+    '80_120': [1.1, 1.1],
+    '120_plus': [1.2, 1.2],
+  },
+  layoutAdjustments: {
+    none: [0, 0],
+    minor: [2000, 5000],
+    major: [6000, 12000],
+  },
+  showerTubAdjustments: {
+    refresh: [0, 0],
+    standard_replacement: [2000, 5000],
+    walk_in_tiled: [6000, 12000],
+    luxury_custom: [12000, 25000],
+  },
+  vanityAdjustments: {
+    basic_prefab: [500, 1500],
+    semi_custom: [2000, 5000],
+    custom_double: [5000, 12000],
+  },
+  tileAdjustments: {
+    minimal: [1000, 3000],
+    standard: [4000, 8000],
+    full: [8000, 15000],
+    luxury: [15000, 30000],
+  },
+  finishWeighting: {
+    budget: { min: 0.92, max: 0.96, spread: 0.11 },
+    standard: { min: 0.96, max: 1, spread: 0.13 },
+    mid_range: { min: 1.01, max: 1.05, spread: 0.15 },
+    high_end: { min: 1.05, max: 1.1, spread: 0.12 },
+  },
+} as const
+
 function getFilteredOptions(question: Question, tier: string) {
   return (question.options || []).filter((option) => !option.tiers || option.tiers.includes(tier as TierKey))
 }
 
 function getAllQuestions(project: Project | undefined, tier: string) {
   if (!project?.sections) return [] as (Question & { sectionTitle: string })[]
-  if (project.id !== 'kitchen' && !tier) return [] as (Question & { sectionTitle: string })[]
+  if (!['kitchen', 'bathroom'].includes(project.id) && !tier) return [] as (Question & { sectionTitle: string })[]
   return project.sections.flatMap((section) =>
     section.questions.map((question) => ({
       ...question,
       sectionTitle: section.title,
-      options: project.id === 'kitchen' ? question.options : getFilteredOptions(question, tier),
+      options: ['kitchen', 'bathroom'].includes(project.id) ? question.options : getFilteredOptions(question, tier),
     }))
   )
 }
@@ -564,6 +629,37 @@ function inferKitchenTier(answers: Record<string, string>): TierKey {
   return 'best'
 }
 
+function inferBathroomTier(answers: Record<string, string>): TierKey {
+  const scoreMap: Record<string, number> = {
+    none: 0,
+    minor: 1,
+    major: 2,
+    basic_prefab: 0,
+    semi_custom: 1,
+    custom_double: 2,
+    minimal: 0,
+    standard: 1,
+    full: 2,
+    luxury: 2,
+    refresh: 0,
+    standard_replacement: 0,
+    walk_in_tiled: 1,
+    luxury_custom: 2,
+    budget: 0,
+    mid_range: 1,
+    high_end: 2,
+  }
+  const score =
+    (scoreMap[answers.bathLayout] ?? 0) +
+    (scoreMap[answers.vanity] ?? 0) +
+    (scoreMap[answers.tile] ?? 0) +
+    (scoreMap[answers.showerTub] ?? 0) +
+    (scoreMap[answers.finishLevel] ?? 0)
+  if (score <= 2) return 'good'
+  if (score <= 6) return 'better'
+  return 'best'
+}
+
 function roundPresentation(value: number) {
   return Math.round(value / 500) * 500
 }
@@ -573,6 +669,15 @@ function getKitchenCategoryOption(category: KitchenScoredCategory, value: string
   if (value && bucket[value]) return bucket[value]
   if (bucket.not_sure) return bucket.not_sure
   return bucket.keep
+}
+
+function getBathroomAdjustmentValue(
+  map: Record<string, readonly [number, number]>,
+  key: string | undefined,
+  fallback: string
+) {
+  if (key && map[key]) return map[key]
+  return map[fallback]
 }
 
 function calculateEstimate(project: Project | undefined, tier: string, answers: Record<string, string>) {
@@ -603,6 +708,48 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
       summary.push({ section: question.sectionTitle, question: question.label, answer: option.label })
     }
     return { low: finalLow, high: Math.max(finalHigh, finalLow + 500), summary, inferredTier: kitchenTier }
+  }
+  if (project.id === 'bathroom') {
+    const bathroomType = answers.bathroomType || 'full_bathroom'
+    const size = answers.bathroomSize || '40_80'
+    const [baseMin, baseMax] = getBathroomAdjustmentValue(bathroomPricing.baseRangeByType, bathroomType, 'full_bathroom')
+    const [sizeMinMultiplier, sizeMaxMultiplier] = getBathroomAdjustmentValue(bathroomPricing.sizeMultiplier, size, '40_80')
+    let rawMin = baseMin * sizeMinMultiplier
+    let rawMax = baseMax * sizeMaxMultiplier
+
+    const [layoutMin, layoutMax] = getBathroomAdjustmentValue(bathroomPricing.layoutAdjustments, answers.bathLayout, 'none')
+    const [showerMin, showerMax] = getBathroomAdjustmentValue(bathroomPricing.showerTubAdjustments, answers.showerTub, 'refresh')
+    const [vanityMin, vanityMax] = getBathroomAdjustmentValue(bathroomPricing.vanityAdjustments, answers.vanity, 'basic_prefab')
+    const [tileMin, tileMax] = getBathroomAdjustmentValue(bathroomPricing.tileAdjustments, answers.tile, 'minimal')
+    rawMin += layoutMin + showerMin + vanityMin + tileMin
+    rawMax += layoutMax + showerMax + vanityMax + tileMax
+
+    const finishLevel = answers.finishLevel || 'standard'
+    const weighting = bathroomPricing.finishWeighting[finishLevel as keyof typeof bathroomPricing.finishWeighting] || bathroomPricing.finishWeighting.standard
+    const weightedMin = rawMin * weighting.min
+    const weightedMax = rawMax * weighting.max
+    const mid = (weightedMin + weightedMax) / 2
+
+    const confidenceSelections = [answers.bathLayout, answers.showerTub, answers.vanity, answers.tile, answers.finishLevel].filter(Boolean).length
+    const consistencyBoost =
+      answers.finishLevel === 'high_end' && (answers.showerTub === 'luxury_custom' || answers.tile === 'luxury')
+        ? 0.85
+        : answers.finishLevel === 'budget' && answers.showerTub === 'refresh' && answers.tile === 'minimal'
+          ? 0.88
+          : 1
+    const breadth = Math.max(weighting.spread - confidenceSelections * 0.005, 0.1) * consistencyBoost
+    const finalLow = roundPresentation(mid * (1 - breadth / 2))
+    const finalHigh = roundPresentation(mid * (1 + breadth / 2))
+
+    const summary: Array<{ section: string; question: string; answer: string }> = []
+    for (const question of getAllQuestions(project, '')) {
+      const value = answers[question.id]
+      if (!value) continue
+      const option = question.options.find((o) => o.value === value)
+      if (!option) continue
+      summary.push({ section: question.sectionTitle, question: question.label, answer: option.label })
+    }
+    return { low: finalLow, high: Math.max(finalHigh, finalLow + 500), summary, inferredTier: inferBathroomTier(answers) }
   }
   if (!tier) return null
   const [baseLow, baseHigh] = project.baseRanges[tier as TierKey] || [0, 0]
@@ -638,10 +785,10 @@ function runEstimatorSmokeTests() {
   console.assert(rangeToText([1000, 2000]) === '$1,000 - $2,000', 'rangeToText should format a currency range')
   console.assert(getProject('kitchen')?.name === 'Kitchen Remodel', 'getProject should find kitchen project')
   console.assert(inferKitchenTier({ layout: 'keep', cabinets: 'stock', countertops: 'laminate', appliances: 'standard', flooring: 'lvp', backsplash: 'standard', island: 'none', lighting: 'basic' }) === 'good', 'kitchen tier should infer as good for value selections')
-  const goodQuestions = getAllQuestions(getProject('bathroom'), 'good')
-  const wetArea = goodQuestions.find((q) => q.id === 'showerTub')?.options.map((o) => o.value) || []
-  console.assert(wetArea.includes('alcoveShower'), 'good bathroom tier should include alcove shower')
-  console.assert(wetArea.includes('other'), 'good bathroom tier should include other option')
+  console.assert(inferBathroomTier({ bathLayout: 'none', vanity: 'basic_prefab', tile: 'minimal', showerTub: 'refresh', finishLevel: 'budget' }) === 'good', 'bathroom tier should infer as good for value selections')
+  const bathroomQuestions = getAllQuestions(getProject('bathroom'), '')
+  const showerOptions = bathroomQuestions.find((q) => q.id === 'showerTub')?.options.map((o) => o.value) || []
+  console.assert(showerOptions.includes('walk_in_tiled'), 'bathroom options should include walk-in tiled shower')
 }
 
 runEstimatorSmokeTests()
@@ -731,8 +878,13 @@ export default function App() {
   const [consultationSubmitting, setConsultationSubmitting] = useState(false)
 
   const project = useMemo(() => getProject(projectId), [projectId])
-  const requiresTierSelection = project ? project.id !== 'kitchen' : true
-  const activeTier = requiresTierSelection ? tier : inferKitchenTier(answers)
+  const requiresTierSelection = project ? !['kitchen', 'bathroom'].includes(project.id) : true
+  const activeTier = useMemo(() => {
+    if (!project) return tier
+    if (requiresTierSelection) return tier
+    if (project.id === 'bathroom') return inferBathroomTier(answers)
+    return inferKitchenTier(answers)
+  }, [project, requiresTierSelection, tier, answers])
   const activeQuestions = useMemo(() => getAllQuestions(project, tier), [project, tier])
   const estimate = useMemo(() => calculateEstimate(project, tier, answers), [project, tier, answers])
   const estimateSummary = useMemo(
@@ -883,7 +1035,7 @@ export default function App() {
     pdf.setFont('helvetica', 'normal')
     pdf.setFontSize(11)
     pdf.text(`Project type: ${project.name}`, marginX + 16, y + 42)
-    pdf.text(`${project.id === 'kitchen' ? 'Inferred tier' : 'Selected tier'}: ${TIERS[activeTier as TierKey].label}`, marginX + 16, y + 58)
+    pdf.text(`${derivedTierProjectIds.has(project.id) ? 'Inferred tier' : 'Selected tier'}: ${TIERS[activeTier as TierKey].label}`, marginX + 16, y + 58)
     pdf.text('Phone: 423-777-6849', marginX + 16, y + 74)
     pdf.setTextColor(54, 93, 135)
     pdf.setFont('helvetica', 'bold')
@@ -1001,7 +1153,13 @@ export default function App() {
           {currentQuestion.sectionTitle}
         </div>
         <div className="section-title top-sm" style={{ color: BRAND.ink }}>{currentQuestion.label}</div>
-        <div className="section-copy">{project?.id === 'kitchen' ? 'Select the option that best matches your planned scope.' : 'Your selected tier filters the options shown below.'}</div>
+        <div className="section-copy">
+          {project?.id === 'kitchen'
+            ? 'Select the option that best matches your planned scope.'
+            : project?.id === 'bathroom'
+              ? 'Choose the option that best reflects your planned bathroom scope.'
+              : 'Your selected tier filters the options shown below.'}
+        </div>
         <div className="top-lg">
           <OptionCards
             question={currentQuestion}
@@ -1035,7 +1193,7 @@ export default function App() {
           <div className="kicker light">Estimate preview</div>
           <div className="stack-md top-lg">
             <InfoBlock label="Project" value={project?.name || '-'} />
-            <InfoBlock label={project?.id === 'kitchen' ? 'Inferred tier' : 'Selected tier'} value={activeTier ? TIERS[activeTier as TierKey].label : '-'} pill />
+            <InfoBlock label={project?.id && derivedTierProjectIds.has(project.id) ? 'Inferred tier' : 'Selected tier'} value={activeTier ? TIERS[activeTier as TierKey].label : '-'} pill />
             <InfoBlock label="Current planning range" value={estimate ? rangeToText([estimate.low, estimate.high]) : '-'} range />
           </div>
           <div className="info-box top-xl">When you continue, we'll generate your planning range and downloadable PDF summary.</div>
@@ -1050,13 +1208,23 @@ export default function App() {
         <div className="card-pad">
           <div className="kicker" style={{ color: BRAND.forest }}>Your Planning Range</div>
           <div className="range-title" style={{ backgroundColor: BRAND.ink, color: 'white' }}>
-            {project.id === 'kitchen' ? `Estimated Kitchen Remodel: ${rangeToText([estimate.low, estimate.high])}` : rangeToText([estimate.low, estimate.high])}
+            {project.id === 'kitchen'
+              ? `Estimated Kitchen Remodel: ${rangeToText([estimate.low, estimate.high])}`
+              : project.id === 'bathroom'
+                ? `Estimated Bathroom Remodel: ${rangeToText([estimate.low, estimate.high])}`
+                : rangeToText([estimate.low, estimate.high])}
           </div>
-          <div className="section-copy">{project.id === 'kitchen' ? 'Based on similar kitchen projects and your selections' : 'Based on your selected scope, finish level, and project type.'}</div>
+          <div className="section-copy">
+            {project.id === 'kitchen'
+              ? 'Based on similar kitchen projects and your selections'
+              : project.id === 'bathroom'
+                ? 'Based on your bathroom type, layout complexity, fixture selections, and finish level.'
+                : 'Based on your selected scope, finish level, and project type.'}
+          </div>
           {project.id === 'kitchen' ? <div className="section-copy">Most homeowners spend around {rangeToText([estimate.low, estimate.high])} for a kitchen like this</div> : null}
           <div className="grid-three top-lg">
             <SummaryPill label="Project type" value={project.name} />
-            <SummaryPill label={project.id === 'kitchen' ? 'Inferred tier' : 'Selected tier'} value={TIERS[activeTier as TierKey].label} highlight />
+            <SummaryPill label={derivedTierProjectIds.has(project.id) ? 'Inferred tier' : 'Selected tier'} value={TIERS[activeTier as TierKey].label} highlight />
             <SummaryPill label="Prepared for" value={lead.fullName || 'Prospective Client'} />
           </div>
           <div className="top-xl">
@@ -1071,7 +1239,9 @@ export default function App() {
             </div>
           </div>
           <div className="disclaimer top-xl" style={{ borderColor: BRAND.sand, backgroundColor: BRAND.cream, color: BRAND.forest }}>
-            This estimate is a planning range based on the selections above. Final pricing depends on field conditions, structural requirements, measurements, permits, engineering, and material availability.
+            {project.id === 'bathroom'
+              ? 'This estimate is based on your bathroom type, layout complexity, fixture selections, and finish level. Most projects with similar selections fall within this range, excluding hidden conditions or structural repairs.'
+              : 'This estimate is a planning range based on the selections above. Final pricing depends on field conditions, structural requirements, measurements, permits, engineering, and material availability.'}
           </div>
         </div>
       </Card>
