@@ -924,6 +924,25 @@ export default function App() {
   function next() { if (canContinue()) setStep((s) => Math.min(s + 1, stages.length - 1)) }
   function back() { setStep((s) => Math.max(s - 1, 0)) }
   function start() { setStep(1) }
+  function startOver() {
+    setStep(0)
+    setProjectId('')
+    setTier('')
+    setAnswers({})
+    setLead({ fullName: '', email: '', phone: '', notes: '' })
+    setConsultationOpen(false)
+    setConsultationError('')
+    setConsultationSuccess('')
+    setConsultationSubmitting(false)
+    setConsultationForm({
+      fullName: '',
+      phone: '',
+      email: '',
+      preferredCallbackTime: '',
+      projectAddress: '',
+      notes: '',
+    })
+  }
 
   function resetAnswersForTier(nextTier: string) {
     if (!project) return {}
@@ -1277,6 +1296,9 @@ export default function App() {
           <div className="form-stack top-xl">
             <Button className="full text-white" style={{ backgroundColor: BRAND.ink }} onClick={downloadPdf}><Download className="icon-inline" /> Download PDF</Button>
             <Button variant="outline" className="full" onClick={openConsultationModal}>Schedule Consultation</Button>
+            <Button variant="outline" className="full" onClick={startOver}>
+              Start Over
+            </Button>
             <Button variant="outline" className="full" onClick={() => { window.location.href = 'mailto:info@peacefulhavenhomes.com' }}>
               <Mail className="icon-inline" /> Email Us
             </Button>
