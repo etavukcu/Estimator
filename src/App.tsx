@@ -749,7 +749,10 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
       if (!option) continue
       summary.push({ section: question.sectionTitle, question: question.label, answer: option.label })
     }
-    return { low: finalLow, high: Math.max(finalHigh, finalLow + 500), summary, inferredTier: inferBathroomTier(answers) }
+    const minimumBathroomStartPrice = 15000
+    const adjustedLow = Math.max(finalLow, minimumBathroomStartPrice)
+    const adjustedHigh = Math.max(finalHigh, adjustedLow + 500)
+    return { low: adjustedLow, high: adjustedHigh, summary, inferredTier: inferBathroomTier(answers) }
   }
   if (!tier) return null
   const [baseLow, baseHigh] = project.baseRanges[tier as TierKey] || [0, 0]
