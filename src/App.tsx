@@ -361,60 +361,119 @@ const PROJECTS: Project[] = [
   },
   {
     id: 'suite',
-    name: 'Mother-in-Law Suite',
+    name: 'Mother-in-Law Suite Remodel',
     icon: Home,
-    description: 'Guest suite, ADU-style conversion, or private living quarters.',
-    baseRanges: { good: [80000, 140000], better: [140000, 220000], best: [220000, 350000] },
+    description: 'Garage conversion, basement conversion, attached addition, or detached ADU-style suite.',
+    baseRanges: { good: [0, 0], better: [0, 0], best: [0, 0] },
     sections: [
       {
-        title: 'Suite Scope',
+        title: 'Approximate Size',
         questions: [
           {
             id: 'suiteSize',
-            label: 'How large will the suite be?',
+            label: 'What is the approximate size of the suite?',
             options: [
-              { value: 'small', label: 'Under 500 sq ft', adj: [0, 0] },
-              { value: 'medium', label: '500-800 sq ft', adj: [30000, 60000] },
-              { value: 'large', label: '800-1200 sq ft', adj: [80000, 140000] },
-            ],
-          },
-          {
-            id: 'suiteKitchen',
-            label: 'Should a kitchen be included?',
-            options: [
-              { value: 'none', label: 'No kitchen', adj: [0, 0] },
-              { value: 'kitchenette', label: 'Kitchenette', adj: [15000, 30000], tiers: ['good', 'better'] },
-              { value: 'full', label: 'Full kitchen', adj: [40000, 80000], tiers: ['better', 'best'] },
+              { value: '300_500', label: '300–500 sqft', adj: [0, 0] },
+              { value: '500_800', label: '500–800 sqft', adj: [0, 0] },
+              { value: '800_1200', label: '800–1200 sqft', adj: [0, 0] },
+              { value: '1200_plus', label: '1200+ sqft', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', helper: 'We will use a typical mid-size suite assumption.', adj: [0, 0] },
             ],
           },
         ],
       },
       {
-        title: 'Features',
+        title: 'Project Type',
         questions: [
           {
-            id: 'suiteBath',
-            label: 'What bathroom scope should we include?',
+            id: 'suiteProjectType',
+            label: 'What type of project is this?',
             options: [
-              { value: 'half', label: 'Half bath', adj: [8000, 15000], tiers: ['good'] },
-              { value: 'full', label: 'Full bath', adj: [20000, 35000], tiers: ['good', 'better'] },
-              { value: 'luxury', label: 'Luxury bath', adj: [40000, 70000], tiers: ['best'] },
+              { value: 'convert_existing', label: 'Convert existing space', helper: 'Example: garage, basement, or bonus room conversion.', adj: [0, 0] },
+              { value: 'attached_addition', label: 'Attached addition', adj: [0, 0] },
+              { value: 'detached_structure', label: 'Detached new structure', adj: [0, 0] },
+              { value: 'other', label: 'Other', helper: 'Custom or hybrid scope not listed above.', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', helper: 'We will use attached addition as a neutral baseline.', adj: [0, 0] },
             ],
           },
+        ],
+      },
+      {
+        title: 'Kitchen Setup',
+        questions: [
           {
-            id: 'entrance',
-            label: 'Do you want a separate entrance?',
+            id: 'suiteKitchen',
+            label: 'What kind of kitchen setup will the suite include?',
             options: [
-              { value: 'no', label: 'No', adj: [0, 0] },
-              { value: 'yes', label: 'Yes', adj: [5000, 12000] },
+              { value: 'none', label: 'No kitchen', adj: [0, 0] },
+              { value: 'kitchenette', label: 'Kitchenette', adj: [0, 0] },
+              { value: 'full_kitchen', label: 'Full kitchen', adj: [0, 0] },
+              { value: 'other', label: 'Other', helper: 'Custom kitchen scope allowance.', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', helper: 'We will include a modest kitchenette allowance.', adj: [0, 0] },
             ],
           },
+        ],
+      },
+      {
+        title: 'Bathroom Setup',
+        questions: [
           {
-            id: 'hvac',
-            label: 'How should HVAC be handled?',
+            id: 'suiteBathroom',
+            label: 'What bathroom setup will the suite include?',
             options: [
-              { value: 'extend', label: 'Extend existing', adj: [4000, 8000], tiers: ['good', 'better'] },
-              { value: 'separate', label: 'Separate HVAC', adj: [10000, 20000], tiers: ['better', 'best'] },
+              { value: 'one_standard', label: '1 standard bathroom', adj: [0, 0] },
+              { value: 'two_bathrooms', label: '2 bathrooms', adj: [0, 0] },
+              { value: 'one_luxury', label: '1 upgraded / luxury bathroom', adj: [0, 0] },
+              { value: 'other', label: 'Other', helper: 'Custom 1.5 bath or mixed setup allowance.', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', helper: 'We will assume 1 standard bathroom.', adj: [0, 0] },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Utilities / Systems Complexity',
+        questions: [
+          {
+            id: 'suiteUtilities',
+            label: 'What level of plumbing, electrical, or HVAC work will likely be needed?',
+            options: [
+              { value: 'existing_accessible', label: 'Existing systems are accessible', adj: [0, 0] },
+              { value: 'some_upgrades', label: 'Some upgrades needed', adj: [0, 0] },
+              { value: 'full_new_systems', label: 'Full new plumbing / electrical / HVAC needed', adj: [0, 0] },
+              { value: 'other', label: 'Other', helper: 'Custom systems scope between moderate and full new systems.', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', helper: 'We will include a moderate systems-upgrade allowance.', adj: [0, 0] },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Finish Level',
+        questions: [
+          {
+            id: 'suiteFinish',
+            label: 'What level of finishes are you expecting?',
+            options: [
+              { value: 'standard', label: 'Standard', adj: [0, 0] },
+              { value: 'mid_range', label: 'Mid-range', adj: [0, 0] },
+              { value: 'high_end', label: 'High-end', adj: [0, 0] },
+              { value: 'other', label: 'Other', helper: 'Custom finish path slightly above mid-range.', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', helper: 'We will use a mid-range finish assumption.', adj: [0, 0] },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Site / Construction Complexity',
+        questions: [
+          {
+            id: 'suiteSiteComplexity',
+            label: 'Are there any site or construction challenges?',
+            options: [
+              { value: 'easy_access', label: 'Easy access / straightforward build', adj: [0, 0] },
+              { value: 'tight_access', label: 'Tight access / limited working space', adj: [0, 0] },
+              { value: 'major_challenges', label: 'Major grading, structural, or foundation challenges', adj: [0, 0] },
+              { value: 'other', label: 'Other', helper: 'Custom challenges between moderate and major complexity.', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not sure', helper: 'We will use a mild-to-moderate complexity assumption.', adj: [0, 0] },
             ],
           },
         ],
@@ -565,7 +624,7 @@ const kitchenSectionIcons: Record<string, string> = {
   Lighting: '💡',
 }
 
-const derivedTierProjectIds = new Set(['kitchen', 'bathroom'])
+const derivedTierProjectIds = new Set(['kitchen', 'bathroom', 'suite'])
 
 const bathroomPricing = {
   baseRangeByType: {
@@ -617,18 +676,70 @@ const bathroomPricing = {
   },
 } as const
 
+const suitePricing = {
+  baseRangeBySize: {
+    '300_500': [90000, 140000],
+    '500_800': [130000, 200000],
+    '800_1200': [180000, 300000],
+    '1200_plus': [250000, 400000],
+    not_sure: [150000, 230000],
+  },
+  projectTypeMultiplier: {
+    convert_existing: [0.7, 0.82],
+    attached_addition: [1, 1],
+    detached_structure: [1.28, 1.42],
+    other: [1.06, 1.14],
+    not_sure: [1, 1],
+  },
+  finishMultiplier: {
+    standard: [0.9, 0.92],
+    mid_range: [1, 1],
+    high_end: [1.16, 1.23],
+    other: [1.04, 1.08],
+    not_sure: [1, 1],
+  },
+  siteComplexityMultiplier: {
+    easy_access: [1, 1],
+    tight_access: [1.05, 1.1],
+    major_challenges: [1.15, 1.25],
+    other: [1.1, 1.17],
+    not_sure: [1.04, 1.08],
+  },
+  kitchenAdjustments: {
+    none: [-30000, -15000],
+    kitchenette: [10000, 25000],
+    full_kitchen: [25000, 60000],
+    other: [18000, 42000],
+    not_sure: [12000, 28000],
+  },
+  bathroomAdjustments: {
+    one_standard: [0, 0],
+    two_bathrooms: [15000, 30000],
+    one_luxury: [10000, 25000],
+    other: [12000, 22000],
+    not_sure: [0, 0],
+  },
+  utilitiesAdjustments: {
+    existing_accessible: [0, 0],
+    some_upgrades: [10000, 25000],
+    full_new_systems: [25000, 60000],
+    other: [18000, 43000],
+    not_sure: [10000, 24000],
+  },
+} as const
+
 function getFilteredOptions(question: Question, tier: string) {
   return (question.options || []).filter((option) => !option.tiers || option.tiers.includes(tier as TierKey))
 }
 
 function getAllQuestions(project: Project | undefined, tier: string) {
   if (!project?.sections) return [] as (Question & { sectionTitle: string })[]
-  if (!['kitchen', 'bathroom'].includes(project.id) && !tier) return [] as (Question & { sectionTitle: string })[]
+  if (!['kitchen', 'bathroom', 'suite'].includes(project.id) && !tier) return [] as (Question & { sectionTitle: string })[]
   return project.sections.flatMap((section) =>
     section.questions.map((question) => ({
       ...question,
       sectionTitle: section.title,
-      options: ['kitchen', 'bathroom'].includes(project.id) ? question.options : getFilteredOptions(question, tier),
+      options: ['kitchen', 'bathroom', 'suite'].includes(project.id) ? question.options : getFilteredOptions(question, tier),
     }))
   )
 }
@@ -703,6 +814,97 @@ function hasBathroomFallbackSelections(answers: Record<string, string>) {
   return [answers.bathroomSize, answers.bathLayout, answers.showerTub, answers.vanity, answers.tile, answers.finishLevel].some(
     (value) => value === 'not_sure_estimate' || value === 'other_custom_setup' || value === 'other'
   )
+}
+
+function getSuiteAdjustmentValue(
+  map: Record<string, readonly [number, number]>,
+  key: string | undefined,
+  fallback: string
+) {
+  if (key && map[key]) return map[key]
+  return map[fallback]
+}
+
+function hasSuiteFallbackSelections(answers: Record<string, string>) {
+  return [
+    answers.suiteSize,
+    answers.suiteProjectType,
+    answers.suiteKitchen,
+    answers.suiteBathroom,
+    answers.suiteUtilities,
+    answers.suiteFinish,
+    answers.suiteSiteComplexity,
+  ].some((value) => value === 'not_sure' || value === 'other')
+}
+
+function getSuiteSummaryLabel(questionId: string, answerValue: string, optionLabel: string) {
+  if (answerValue !== 'not_sure' && answerValue !== 'other') return optionLabel
+  if (answerValue === 'not_sure') {
+    const labels: Record<string, string> = {
+      suiteSize: 'Not sure (mid-size planning assumption)',
+      suiteProjectType: 'Not sure (attached-addition baseline used)',
+      suiteKitchen: 'Not sure (modest kitchenette allowance)',
+      suiteBathroom: 'Not sure (1 standard bathroom assumed)',
+      suiteUtilities: 'Not sure (moderate systems-upgrade allowance)',
+      suiteFinish: 'Not sure (mid-range finish assumption)',
+      suiteSiteComplexity: 'Not sure (mild-to-moderate site complexity)',
+    }
+    return labels[questionId] || optionLabel
+  }
+  const labels: Record<string, string> = {
+    suiteProjectType: 'Other project type (hybrid scope allowance)',
+    suiteKitchen: 'Other kitchen setup (custom midpoint allowance)',
+    suiteBathroom: 'Other bathroom setup (custom midpoint allowance)',
+    suiteUtilities: 'Other utilities scope (custom systems allowance)',
+    suiteFinish: 'Other finish level (slightly above mid-range)',
+    suiteSiteComplexity: 'Other site complexity (moderate-to-major allowance)',
+  }
+  return labels[questionId] || optionLabel
+}
+
+function inferSuiteTier(answers: Record<string, string>): TierKey {
+  const finish = answers.suiteFinish || 'mid_range'
+  const projectType = answers.suiteProjectType || 'attached_addition'
+  if (finish === 'standard' && projectType === 'convert_existing') return 'good'
+  if (finish === 'high_end' || projectType === 'detached_structure') return 'best'
+  return 'better'
+}
+
+function getSuiteKeyDrivers(answers: Record<string, string>) {
+  const sizeMap: Record<string, string> = {
+    '300_500': 'Suite size selected in the 300–500 sqft range, which anchors a smaller build scope.',
+    '500_800': 'Suite size selected in the 500–800 sqft range, a common baseline for in-law suites.',
+    '800_1200': 'Suite size selected in the 800–1200 sqft range, which carries a larger construction and finish scope.',
+    '1200_plus': 'Suite size selected above 1,200 sqft, which substantially increases construction scope and systems load.',
+    not_sure: 'Size was marked as not sure, so a mid-size suite planning assumption was used.',
+  }
+  const projectMap: Record<string, string> = {
+    convert_existing: 'Existing-space conversion typically lowers structural and shell costs versus new construction.',
+    attached_addition: 'Attached addition was used as a structural baseline for pricing.',
+    detached_structure: 'Detached structure scope increases framing, utilities routing, and overall build complexity.',
+    other: 'Custom project type was treated as a hybrid scope slightly above an attached addition.',
+    not_sure: 'Project type was not finalized, so attached-addition assumptions were used.',
+  }
+  const systemsMap: Record<string, string> = {
+    existing_accessible: 'Utilities were assumed to be readily accessible, helping control systems costs.',
+    some_upgrades: 'Moderate plumbing, electrical, and HVAC upgrade allowances were included.',
+    full_new_systems: 'Full new utility systems were included, a major driver for ADU and detached suite budgets.',
+    other: 'A custom systems allowance between moderate and full-new scope was included.',
+    not_sure: 'Utilities were not finalized, so a moderate systems-upgrade allowance was used.',
+  }
+  const finishMap: Record<string, string> = {
+    standard: 'Standard finish expectations reduce overall finish-related cost pressure.',
+    mid_range: 'Mid-range finishes were used as the baseline expectation.',
+    high_end: 'High-end finishes increase pricing due to upgraded materials and detailing.',
+    other: 'Custom finish expectations were treated slightly above mid-range.',
+    not_sure: 'Finish level was not finalized, so mid-range assumptions were used.',
+  }
+  return [
+    sizeMap[answers.suiteSize || 'not_sure'],
+    projectMap[answers.suiteProjectType || 'not_sure'],
+    systemsMap[answers.suiteUtilities || 'not_sure'],
+    finishMap[answers.suiteFinish || 'not_sure'],
+  ]
 }
 
 function getBathroomSummaryLabel(questionId: string, answerValue: string, optionLabel: string) {
@@ -790,6 +992,48 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
     const adjustedHigh = Math.max(finalHigh, adjustedLow + 500)
     return { low: adjustedLow, high: adjustedHigh, summary, inferredTier: inferBathroomTier(answers) }
   }
+  if (project.id === 'suite') {
+    const size = answers.suiteSize || 'not_sure'
+    const [baseLow, baseHigh] = getSuiteAdjustmentValue(suitePricing.baseRangeBySize, size, 'not_sure')
+    let rawMin = baseLow
+    let rawMax = baseHigh
+
+    const [projectMin, projectMax] = getSuiteAdjustmentValue(suitePricing.projectTypeMultiplier, answers.suiteProjectType, 'not_sure')
+    const [finishMin, finishMax] = getSuiteAdjustmentValue(suitePricing.finishMultiplier, answers.suiteFinish, 'not_sure')
+    const [siteMin, siteMax] = getSuiteAdjustmentValue(suitePricing.siteComplexityMultiplier, answers.suiteSiteComplexity, 'not_sure')
+    rawMin *= projectMin * finishMin * siteMin
+    rawMax *= projectMax * finishMax * siteMax
+
+    const [kitchenMin, kitchenMax] = getSuiteAdjustmentValue(suitePricing.kitchenAdjustments, answers.suiteKitchen, 'not_sure')
+    const [bathMin, bathMax] = getSuiteAdjustmentValue(suitePricing.bathroomAdjustments, answers.suiteBathroom, 'not_sure')
+    const [utilitiesMin, utilitiesMax] = getSuiteAdjustmentValue(suitePricing.utilitiesAdjustments, answers.suiteUtilities, 'not_sure')
+    rawMin += kitchenMin + bathMin + utilitiesMin
+    rawMax += kitchenMax + bathMax + utilitiesMax
+
+    const midpoint = (rawMin + rawMax) / 2
+    const selectionCount = [answers.suiteSize, answers.suiteProjectType, answers.suiteKitchen, answers.suiteBathroom, answers.suiteUtilities, answers.suiteFinish, answers.suiteSiteComplexity].filter(Boolean).length
+    const fallbackCount = [answers.suiteSize, answers.suiteProjectType, answers.suiteKitchen, answers.suiteBathroom, answers.suiteUtilities, answers.suiteFinish, answers.suiteSiteComplexity].filter(
+      (value) => value === 'not_sure' || value === 'other'
+    ).length
+    const baseSpread = Math.max(0.22 - selectionCount * 0.01, 0.13)
+    const fallbackSpread = Math.min(fallbackCount * 0.008, 0.04)
+    const moderatedSpread = Math.min(baseSpread + fallbackSpread, 0.2)
+    const finalLow = roundPresentation(midpoint * (1 - moderatedSpread / 2))
+    const finalHigh = roundPresentation(midpoint * (1 + moderatedSpread / 2))
+
+    const summary: Array<{ section: string; question: string; answer: string }> = []
+    for (const question of getAllQuestions(project, '')) {
+      const value = answers[question.id]
+      if (!value) continue
+      const option = question.options.find((o) => o.value === value)
+      if (!option) continue
+      summary.push({ section: question.sectionTitle, question: question.label, answer: getSuiteSummaryLabel(question.id, value, option.label) })
+    }
+
+    const adjustedLow = Math.max(finalLow, 65000)
+    const adjustedHigh = Math.max(finalHigh, adjustedLow + 1000)
+    return { low: adjustedLow, high: adjustedHigh, summary, inferredTier: inferSuiteTier(answers) }
+  }
   if (!tier) return null
   const [baseLow, baseHigh] = project.baseRanges[tier as TierKey] || [0, 0]
   let low = baseLow
@@ -827,10 +1071,22 @@ function runEstimatorSmokeTests() {
   console.assert(inferBathroomTier({ bathLayout: 'none', vanity: 'basic_prefab', tile: 'minimal', showerTub: 'refresh', finishLevel: 'budget' }) === 'good', 'bathroom tier should infer as good for value selections')
   console.assert(inferBathroomTier({ bathLayout: 'not_sure_estimate', vanity: 'not_sure_estimate', tile: 'not_sure_estimate', showerTub: 'not_sure_estimate', finishLevel: 'not_sure_estimate' }) === 'better', 'bathroom tier should infer as better for uncertain selections')
   console.assert(inferBathroomTier({ bathLayout: 'major', vanity: 'other', tile: 'luxury', showerTub: 'other_custom_setup', finishLevel: 'high_end' }) === 'best', 'bathroom tier should infer as best for custom/high-end selections')
+  console.assert(inferSuiteTier({ suiteFinish: 'standard', suiteProjectType: 'convert_existing' }) === 'good', 'suite tier should infer as good for standard conversion scope')
+  console.assert(inferSuiteTier({ suiteFinish: 'high_end', suiteProjectType: 'detached_structure' }) === 'best', 'suite tier should infer as best for high-end detached scope')
   const bathroomQuestions = getAllQuestions(getProject('bathroom'), '')
   const showerOptions = bathroomQuestions.find((q) => q.id === 'showerTub')?.options.map((o) => o.value) || []
   console.assert(showerOptions.includes('walk_in_tiled'), 'bathroom options should include walk-in tiled shower')
   console.assert(showerOptions.includes('not_sure_estimate') && showerOptions.includes('other_custom_setup'), 'bathroom options should include shower fallback options')
+  const suiteEstimate = calculateEstimate(getProject('suite'), '', {
+    suiteSize: 'not_sure',
+    suiteProjectType: 'not_sure',
+    suiteKitchen: 'not_sure',
+    suiteBathroom: 'not_sure',
+    suiteUtilities: 'not_sure',
+    suiteFinish: 'not_sure',
+    suiteSiteComplexity: 'not_sure',
+  })
+  console.assert(Boolean(suiteEstimate && suiteEstimate.low > 0 && suiteEstimate.high > suiteEstimate.low), 'suite estimate should return a realistic range with fallback selections')
 }
 
 runEstimatorSmokeTests()
@@ -936,11 +1192,12 @@ export default function App() {
   const [consultationSubmitting, setConsultationSubmitting] = useState(false)
 
   const project = useMemo(() => getProject(projectId), [projectId])
-  const requiresTierSelection = project ? !['kitchen', 'bathroom'].includes(project.id) : true
+  const requiresTierSelection = project ? !['kitchen', 'bathroom', 'suite'].includes(project.id) : true
   const activeTier = useMemo(() => {
     if (!project) return tier
     if (requiresTierSelection) return tier
     if (project.id === 'bathroom') return inferBathroomTier(answers)
+    if (project.id === 'suite') return inferSuiteTier(answers)
     return inferKitchenTier(answers)
   }, [project, requiresTierSelection, tier, answers])
   const activeQuestions = useMemo(() => getAllQuestions(project, tier), [project, tier])
@@ -950,8 +1207,12 @@ export default function App() {
     [project, tier, estimate, lead.fullName]
   )
   const bathroomHasFallbackSelections = useMemo(() => hasBathroomFallbackSelections(answers), [answers])
+  const suiteHasFallbackSelections = useMemo(() => hasSuiteFallbackSelections(answers), [answers])
+  const suiteKeyDrivers = useMemo(() => getSuiteKeyDrivers(answers), [answers])
   const bathroomConfidenceMessage = 'This estimate is based on your bathroom type, layout complexity, fixture selections, and finish level. Most projects with similar selections fall within this range, excluding hidden conditions or structural repairs.'
   const bathroomFallbackConfidenceMessage = 'This estimate is based on your bathroom type, layout complexity, fixture selections, and finish level. Where selections were marked as unsure or custom, we used reasonable planning assumptions to keep the estimate realistic. Final pricing may vary once exact materials and scope are confirmed.'
+  const suiteConfidenceMessage = 'Based on similar Mother-in-Law suite and ADU remodels with comparable size, project type, systems scope, and finish expectations.'
+  const suiteFallbackConfidenceMessage = 'Some selections used typical project assumptions (such as size, utilities, or custom scope), so this range may tighten after layout and systems details are confirmed.'
   const stages = ['welcome', 'project', ...(requiresTierSelection ? ['tier'] : []), ...activeQuestions.map((q) => q.id), 'lead', 'results']
   const currentStage = stages[step] || 'welcome'
   const currentQuestion = activeQuestions.find((q) => q.id === currentStage)
@@ -1139,6 +1400,8 @@ export default function App() {
         ? bathroomHasFallbackSelections
           ? bathroomFallbackConfidenceMessage
           : bathroomConfidenceMessage
+        : project.id === 'suite'
+          ? `${suiteConfidenceMessage} ${suiteHasFallbackSelections ? suiteFallbackConfidenceMessage : ''}`.trim()
         : 'This estimate is a planning range based on the selections above. Final pricing depends on field conditions, structural requirements, measurements, permits, engineering, and material availability.',
       11,
       16
@@ -1246,6 +1509,8 @@ export default function App() {
             ? 'Select the option that best matches your planned scope.'
             : project?.id === 'bathroom'
               ? 'Choose the option that best reflects your planned bathroom scope.'
+              : project?.id === 'suite'
+                ? 'Choose the option that best matches your planned suite scope. If you are unsure, select “Not sure” and we will apply realistic assumptions.'
               : 'Your selected tier filters the options shown below.'}
         </div>
         {estimate ? (
@@ -1308,6 +1573,8 @@ export default function App() {
               ? `Estimated Kitchen Remodel: ${rangeToText([estimate.low, estimate.high])}`
               : project.id === 'bathroom'
                 ? `Estimated Bathroom Remodel: ${rangeToText([estimate.low, estimate.high])}`
+                : project.id === 'suite'
+                  ? `Estimated Mother-in-Law Suite Remodel: ${rangeToText([estimate.low, estimate.high])}`
                 : rangeToText([estimate.low, estimate.high])}
           </div>
           <div className="section-copy">
@@ -1317,9 +1584,21 @@ export default function App() {
                 ? bathroomHasFallbackSelections
                   ? bathroomFallbackConfidenceMessage
                   : 'Based on your bathroom type, layout complexity, fixture selections, and finish level.'
+                : project.id === 'suite'
+                  ? suiteConfidenceMessage
                 : 'Based on your selected scope, finish level, and project type.'}
           </div>
           {project.id === 'kitchen' ? <div className="section-copy">Most homeowners spend around {rangeToText([estimate.low, estimate.high])} for a kitchen like this</div> : null}
+          {project.id === 'suite' ? (
+            <div className="top-md">
+              <div className="section-subtitle" style={{ color: BRAND.ink }}>What drove this range</div>
+              <ul className="top-sm section-copy" style={{ margin: 0, paddingLeft: '1rem' }}>
+                {suiteKeyDrivers.map((driver) => (
+                  <li key={driver}>{driver}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <div className="grid-three top-lg">
             <SummaryPill label="Project type" value={project.name} />
             <SummaryPill label={derivedTierProjectIds.has(project.id) ? 'Inferred tier' : 'Selected tier'} value={TIERS[activeTier as TierKey].label} highlight />
@@ -1341,6 +1620,8 @@ export default function App() {
               ? bathroomHasFallbackSelections
                 ? bathroomFallbackConfidenceMessage
                 : bathroomConfidenceMessage
+              : project.id === 'suite'
+                ? `${suiteConfidenceMessage} ${suiteHasFallbackSelections ? suiteFallbackConfidenceMessage : ''}`.trim()
               : 'This estimate is a planning range based on the selections above. Final pricing depends on field conditions, structural requirements, measurements, permits, engineering, and material availability.'}
           </div>
         </div>
