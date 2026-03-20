@@ -76,6 +76,9 @@
 .icon-sm { width: 18px; height: 18px; }
 .icon-lg { width: 28px; height: 28px; }
 .muted { font-size: 14px; }
+.center { text-align: center; }
+.ghost-link { border: 0; background: transparent; color: #365D87; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.ghost-link:hover { color: #1F2A37; }
 .modal-overlay { position: fixed; inset: 0; background: rgba(31, 42, 55, 0.58); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 50; }
 .modal-card { width: min(860px, 100%); max-height: calc(100vh - 48px); overflow: auto; border-radius: 24px; background: #fff; border: 1px solid #d9e9f8; box-shadow: 0 24px 60px rgba(31, 42, 55, .28); padding: 28px; }
 .modal-header, .modal-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
