@@ -1980,9 +1980,16 @@ export default function App() {
           <div className="feature-chip" style={{ backgroundColor: BRAND.sand, color: BRAND.ink }}>Guided scope-based pricing paths</div>
           <h2 className="hero-title" style={{ color: BRAND.ink }}>Get a planning range for your remodel.</h2>
           <p className="hero-copy">Answer a few guided questions and receive a tailored project range based on your project type and selections.</p>
-          <div className="grid-three">
-            {['Tailored to your selections', 'Designed around realistic finish levels', 'Download PDF Summary'].map((item) => (
-              <div key={item} className="feature-box" style={{ backgroundColor: BRAND.sand, color: BRAND.ink }}>{item}</div>
+          <div className="feature-highlights top-lg" aria-label="What this estimate includes">
+            {[
+              { icon: '✓', text: 'Tailored to your selections' },
+              { icon: '✦', text: 'Designed around realistic finish levels' },
+              { icon: 'ℹ', text: 'Includes a downloadable PDF summary' },
+            ].map((item) => (
+              <div key={item.text} className="feature-highlight-item">
+                <span className="feature-highlight-icon" aria-hidden="true">{item.icon}</span>
+                <span>{item.text}</span>
+              </div>
             ))}
           </div>
           <div className="row-gap wrap-gap top-xl">
@@ -2209,7 +2216,7 @@ export default function App() {
           <div className="section-subtitle top-sm" style={{ color: BRAND.ink }}>Save your summary and move toward a real proposal.</div>
           <p className="section-copy top-sm">Your result is intended to help set expectations and start the conversation. The next step is a consultation, site review, and detailed scope discussion.</p>
           <div className="form-stack top-xl">
-            <Button className="full text-white" style={{ backgroundColor: BRAND.ink }} onClick={downloadPdf}><Download className="icon-inline" /> Download PDF</Button>
+            <Button className="full text-white" style={{ backgroundColor: BRAND.ink }} onClick={downloadPdf}><Download className="icon-inline" /> Download My Estimate</Button>
             <Button variant="outline" className="full" onClick={openConsultationModal}>Schedule Consultation</Button>
             <Button variant="outline" className="full" onClick={() => { window.location.href = 'mailto:info@peacefulhavenhomes.com' }}>
               <Mail className="icon-inline" /> Email Us
@@ -2277,7 +2284,7 @@ export default function App() {
                 onClick={next}
                 disabled={!canContinue()}
               >
-                See My Estimate <ArrowRight className="icon-inline" />
+                Download My Estimate <ArrowRight className="icon-inline" />
               </Button>
             ) : (
               <Button className="text-white" style={{ backgroundColor: BRAND.ink }} onClick={next} disabled={!canContinue()}>
