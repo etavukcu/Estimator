@@ -2211,6 +2211,9 @@ export default function App() {
           <div className="form-stack top-xl">
             <Button className="full text-white" style={{ backgroundColor: BRAND.ink }} onClick={downloadPdf}><Download className="icon-inline" /> Download PDF</Button>
             <Button variant="outline" className="full" onClick={openConsultationModal}>Schedule Consultation</Button>
+            <Button variant="outline" className="full" onClick={startOver}>
+              Start Over
+            </Button>
             <Button variant="outline" className="full" onClick={() => { window.location.href = 'mailto:info@peacefulhavenhomes.com' }}>
               <Mail className="icon-inline" /> Email Us
             </Button>
