@@ -49,7 +49,7 @@ async function postDirectToSupabase(payload: Record<string, unknown>) {
       apikey: directSupabaseAnonKey,
       Authorization: `Bearer ${directSupabaseAnonKey}`,
       'Content-Type': 'application/json',
-      Prefer: 'return=representation',
+      Prefer: 'return=minimal',
     },
     body: JSON.stringify(payload),
   })
