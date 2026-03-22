@@ -35,6 +35,7 @@ type Question = {
   id: string
   label: string
   options: Option[]
+  showWhen?: (answers: Record<string, string>) => boolean
 }
 
 type Section = {
@@ -482,45 +483,273 @@ const PROJECTS: Project[] = [
   },
   {
     id: 'addition',
-    name: 'House Addition',
+    name: 'Home Addition',
     icon: Building2,
-    description: 'New living area, bedroom suite, or larger structural addition.',
-    baseRanges: { good: [150000, 250000], better: [250000, 400000], best: [400000, 700000] },
+    description: 'Guided planning range for bedroom, suite, second-story, and other home additions.',
+    baseRanges: { good: [0, 0], better: [0, 0], best: [0, 0] },
     sections: [
       {
-        title: 'Addition Size',
+        title: 'Addition Type',
         questions: [
           {
-            id: 'footprint',
-            label: 'What size addition are you planning?',
-            options: [
-              { value: 'small', label: '400-600 sq ft', adj: [0, 0] },
-              { value: 'medium', label: '600-1000 sq ft', adj: [80000, 160000] },
-              { value: 'large', label: '1000-1500 sq ft', adj: [200000, 350000] },
-            ],
-          },
-          {
             id: 'additionType',
-            label: 'What type of addition is it?',
+            label: 'What type of addition are you planning?',
             options: [
-              { value: 'bedroom', label: 'Bedroom', adj: [0, 0], tiers: ['good', 'better'] },
-              { value: 'living', label: 'Living room', adj: [10000, 25000], tiers: ['good', 'better'] },
-              { value: 'bedBath', label: 'Bedroom + bath', adj: [40000, 90000], tiers: ['better', 'best'] },
-              { value: 'apartment', label: 'Full apartment', adj: [120000, 250000], tiers: ['best'] },
+              { value: 'bedroom_addition', label: 'Bedroom Addition', adj: [0, 0] },
+              { value: 'primary_suite_addition', label: 'Primary Suite Addition', adj: [0, 0] },
+              { value: 'bathroom_addition', label: 'Bathroom Addition', adj: [0, 0] },
+              { value: 'living_room_addition', label: 'Living Room / Family Room Addition', adj: [0, 0] },
+              { value: 'kitchen_expansion', label: 'Kitchen Expansion', adj: [0, 0] },
+              { value: 'second_story_addition', label: 'Second Story Addition', adj: [0, 0] },
+              { value: 'garage_addition_conversion', label: 'Garage Addition / Conversion', adj: [0, 0] },
+              { value: 'in_law_guest_space_addition', label: 'In-Law / Guest Space Addition', adj: [0, 0] },
+              { value: 'sunroom_enclosed_patio_addition', label: 'Sunroom / Enclosed Patio Addition', adj: [0, 0] },
+              { value: 'mudroom_utility_addition', label: 'Mudroom / Utility Addition', adj: [0, 0] },
+              { value: 'multi_room_addition', label: 'Multi-Room Addition', adj: [0, 0] },
+              { value: 'other', label: 'Other', helper: 'We will map this to the closest addition scope to keep your estimate accurate.', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', helper: 'We will use a flexible addition baseline and keep your estimate useful.', adj: [0, 0] },
             ],
           },
         ],
       },
       {
-        title: 'Structure',
+        title: 'Addition Size',
         questions: [
           {
-            id: 'structureType',
-            label: 'How complex is the structure?',
+            id: 'additionSize',
+            label: 'Approximately how large is the addition?',
             options: [
-              { value: 'slab', label: 'Simple slab', adj: [0, 0], tiers: ['good', 'better'] },
-              { value: 'crawl', label: 'Crawlspace', adj: [10000, 25000], tiers: ['better'] },
-              { value: 'second', label: 'Second story addition', adj: [80000, 200000], tiers: ['best'] },
+              { value: 'under_200', label: 'Under 200 sq ft', adj: [0, 0] },
+              { value: '200_400', label: '200–400 sq ft', adj: [0, 0] },
+              { value: '400_600', label: '400–600 sq ft', adj: [0, 0] },
+              { value: '600_800', label: '600–800 sq ft', adj: [0, 0] },
+              { value: '800_1200', label: '800–1,200 sq ft', adj: [0, 0] },
+              { value: '1200_plus', label: '1,200+ sq ft', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', helper: 'We will use a practical mid-size assumption.', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'finishLevel',
+            label: 'What level of finish are you expecting?',
+            options: [
+              { value: 'basic_builder_grade', label: 'Basic / Builder Grade', adj: [0, 0] },
+              { value: 'mid_range', label: 'Mid-Range', adj: [0, 0] },
+              { value: 'high_end', label: 'High-End', adj: [0, 0] },
+              { value: 'luxury_custom', label: 'Luxury / Custom', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', helper: 'We will use a balanced mid-range allowance.', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'plumbingScope',
+            label: 'Will the addition include plumbing?',
+            options: [
+              { value: 'no_plumbing', label: 'No plumbing', adj: [0, 0] },
+              { value: 'sink_only', label: 'Sink only', adj: [0, 0] },
+              { value: 'full_bathroom', label: 'Full bathroom', adj: [0, 0] },
+              { value: 'kitchenette_plumbing', label: 'Kitchen / kitchenette plumbing', adj: [0, 0] },
+              { value: 'multiple_plumbing_areas', label: 'Multiple plumbing areas', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'hvacScope',
+            label: 'Will the addition include HVAC work?',
+            options: [
+              { value: 'minimal_extension', label: 'Minimal extension from existing system', adj: [0, 0] },
+              { value: 'new_zone', label: 'New zone / significant HVAC work', adj: [0, 0] },
+              { value: 'separate_system', label: 'Separate HVAC system', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'structuralScope',
+            label: 'What kind of foundation / structural work is expected?',
+            options: [
+              { value: 'simple_slab', label: 'Simple slab addition', adj: [0, 0] },
+              { value: 'crawl_space_raised_floor', label: 'Crawl space / raised floor', adj: [0, 0] },
+              { value: 'major_structural_tie_in', label: 'Major structural tie-in', adj: [0, 0] },
+              { value: 'second_story_structural', label: 'Second-story structural addition', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'exteriorScope',
+            label: 'How much exterior work will be involved?',
+            options: [
+              { value: 'minimal_changes', label: 'Minimal exterior changes', adj: [0, 0] },
+              { value: 'roofing_siding_tie_in', label: 'New roofing + siding tie-in', adj: [0, 0] },
+              { value: 'significant_rework', label: 'Significant exterior rework', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'matchQuality',
+            label: 'Are you planning to match the existing home closely?',
+            options: [
+              { value: 'basic_match', label: 'Basic match', adj: [0, 0] },
+              { value: 'good_visual_match', label: 'Good visual match', adj: [0, 0] },
+              { value: 'premium_seamless_match', label: 'Premium seamless match', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'permitDesignScope',
+            label: 'Will permits / design / engineering likely be needed?',
+            options: [
+              { value: 'basic_permit_only', label: 'Basic permit only', adj: [0, 0] },
+              { value: 'permit_plus_plans', label: 'Permit + plans', adj: [0, 0] },
+              { value: 'permit_architect_engineer', label: 'Permit + architect / engineer', adj: [0, 0] },
+              { value: 'full_design_engineering', label: 'Full design + engineering package', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'siteDifficulty',
+            label: 'What best describes the site / build difficulty?',
+            options: [
+              { value: 'easy_access', label: 'Easy access / straightforward build', adj: [0, 0] },
+              { value: 'some_complexity', label: 'Some site or tie-in complexity', adj: [0, 0] },
+              { value: 'tight_access', label: 'Tight access / challenging conditions', adj: [0, 0] },
+              { value: 'major_complexity', label: 'Major complexity', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'primarySuiteBathroom',
+            label: 'Will it include a full bathroom?',
+            showWhen: (answers) => answers.additionType === 'primary_suite_addition',
+            options: [
+              { value: 'yes', label: 'Yes', adj: [0, 0] },
+              { value: 'no', label: 'No', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'primarySuiteCloset',
+            label: 'Will it include a walk-in closet / custom storage?',
+            showWhen: (answers) => answers.additionType === 'primary_suite_addition',
+            options: [
+              { value: 'yes', label: 'Yes', adj: [0, 0] },
+              { value: 'no', label: 'No', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'bathroomAdditionType',
+            label: 'What type of bathroom?',
+            showWhen: (answers) => answers.additionType === 'bathroom_addition',
+            options: [
+              { value: 'half_bath', label: 'Half bath', adj: [0, 0] },
+              { value: 'full_bath', label: 'Full bath', adj: [0, 0] },
+              { value: 'primary_bath', label: 'Primary bath', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'kitchenCabinetScope',
+            label: 'Are you adding major cabinetry / countertops?',
+            showWhen: (answers) => answers.additionType === 'kitchen_expansion',
+            options: [
+              { value: 'yes', label: 'Yes', adj: [0, 0] },
+              { value: 'some', label: 'Some', adj: [0, 0] },
+              { value: 'no', label: 'No', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'kitchenApplianceScope',
+            label: 'Will appliances move or be added?',
+            showWhen: (answers) => answers.additionType === 'kitchen_expansion',
+            options: [
+              { value: 'yes', label: 'Yes', adj: [0, 0] },
+              { value: 'no', label: 'No', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'secondStoryReinforcement',
+            label: 'Is major structural reinforcement expected?',
+            showWhen: (answers) => answers.additionType === 'second_story_addition',
+            options: [
+              { value: 'yes', label: 'Yes', adj: [0, 0] },
+              { value: 'possibly', label: 'Possibly', adj: [0, 0] },
+              { value: 'no', label: 'No', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'garageAttachment',
+            label: 'Attached or detached?',
+            showWhen: (answers) => answers.additionType === 'garage_addition_conversion',
+            options: [
+              { value: 'attached', label: 'Attached', adj: [0, 0] },
+              { value: 'detached', label: 'Detached', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'garageUse',
+            label: 'Finished living space or utility only?',
+            showWhen: (answers) => answers.additionType === 'garage_addition_conversion',
+            options: [
+              { value: 'finished_living_space', label: 'Finished living space', adj: [0, 0] },
+              { value: 'mixed_use', label: 'Mixed use', adj: [0, 0] },
+              { value: 'utility_storage', label: 'Utility / storage', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'guestSleepingArea',
+            label: 'Will a sleeping area be included?',
+            showWhen: (answers) => answers.additionType === 'in_law_guest_space_addition',
+            options: [
+              { value: 'yes', label: 'Yes', adj: [0, 0] },
+              { value: 'no', label: 'No', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'guestKitchenette',
+            label: 'Will a kitchenette be included?',
+            showWhen: (answers) => answers.additionType === 'in_law_guest_space_addition',
+            options: [
+              { value: 'yes', label: 'Yes', adj: [0, 0] },
+              { value: 'no', label: 'No', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'guestFullBathroom',
+            label: 'Will a full bathroom be included?',
+            showWhen: (answers) => answers.additionType === 'in_law_guest_space_addition',
+            options: [
+              { value: 'yes', label: 'Yes', adj: [0, 0] },
+              { value: 'no', label: 'No', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'guestIndependentEntry',
+            label: 'Will an independent entry be needed?',
+            showWhen: (answers) => answers.additionType === 'in_law_guest_space_addition',
+            options: [
+              { value: 'yes', label: 'Yes', adj: [0, 0] },
+              { value: 'no', label: 'No', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
+            ],
+          },
+          {
+            id: 'otherClosestDescription',
+            label: 'Which description is closest?',
+            showWhen: (answers) => answers.additionType === 'other',
+            options: [
+              { value: 'bedroom_sleeping_space', label: 'Bedroom / sleeping space', adj: [0, 0] },
+              { value: 'living_space', label: 'Living space', adj: [0, 0] },
+              { value: 'utility_support_space', label: 'Utility / support space', adj: [0, 0] },
+              { value: 'bathroom_related', label: 'Bathroom-related', adj: [0, 0] },
+              { value: 'kitchen_related', label: 'Kitchen-related', adj: [0, 0] },
+              { value: 'multi_purpose', label: 'Multi-purpose', adj: [0, 0] },
+              { value: 'not_sure', label: 'Not Sure', adj: [0, 0] },
             ],
           },
         ],
@@ -624,7 +853,12 @@ const kitchenSectionIcons: Record<string, string> = {
   Lighting: '💡',
 }
 
-const derivedTierProjectIds = new Set(['kitchen', 'bathroom', 'suite'])
+const additionSectionIcons: Record<string, string> = {
+  'Addition Type': '🏠',
+  'Addition Size': '📐',
+}
+
+const derivedTierProjectIds = new Set(['kitchen', 'bathroom', 'suite', 'addition'])
 
 const bathroomPricing = {
   baseRangeByType: {
@@ -728,20 +962,186 @@ const suitePricing = {
   },
 } as const
 
+const additionPricing = {
+  defaultSqftBySize: {
+    under_200: 160,
+    '200_400': 300,
+    '400_600': 500,
+    '600_800': 700,
+    '800_1200': 1000,
+    '1200_plus': 1400,
+    not_sure: 600,
+  },
+  typePricePerSqft: {
+    bedroom_addition: [220, 300],
+    primary_suite_addition: [300, 410],
+    bathroom_addition: [320, 460],
+    living_room_addition: [235, 325],
+    kitchen_expansion: [290, 420],
+    second_story_addition: [360, 520],
+    garage_addition_conversion: [170, 320],
+    in_law_guest_space_addition: [285, 425],
+    sunroom_enclosed_patio_addition: [190, 295],
+    mudroom_utility_addition: [170, 270],
+    multi_room_addition: [270, 395],
+    other: [250, 365],
+    not_sure: [255, 375],
+  },
+  finishMultiplier: {
+    basic_builder_grade: [0.9, 0.95],
+    mid_range: [1, 1.06],
+    high_end: [1.12, 1.24],
+    luxury_custom: [1.28, 1.42],
+    not_sure: [1, 1.08],
+  },
+  plumbingAdjustments: {
+    no_plumbing: [0, 0],
+    sink_only: [2500, 8000],
+    full_bathroom: [18000, 42000],
+    kitchenette_plumbing: [14000, 32000],
+    multiple_plumbing_areas: [30000, 70000],
+    not_sure: [12000, 32000],
+  },
+  hvacAdjustments: {
+    minimal_extension: [2500, 7000],
+    new_zone: [9000, 22000],
+    separate_system: [17000, 36000],
+    not_sure: [8000, 22000],
+  },
+  structuralAdjustments: {
+    simple_slab: [0, 12000],
+    crawl_space_raised_floor: [12000, 30000],
+    major_structural_tie_in: [35000, 85000],
+    second_story_structural: [70000, 170000],
+    not_sure: [25000, 65000],
+  },
+  exteriorAdjustments: {
+    minimal_changes: [3000, 9000],
+    roofing_siding_tie_in: [12000, 32000],
+    significant_rework: [30000, 75000],
+    not_sure: [12000, 34000],
+  },
+  matchAdjustments: {
+    basic_match: [0, 6000],
+    good_visual_match: [7000, 22000],
+    premium_seamless_match: [22000, 65000],
+    not_sure: [8000, 26000],
+  },
+  permitDesignAdjustments: {
+    basic_permit_only: [2500, 6500],
+    permit_plus_plans: [8000, 20000],
+    permit_architect_engineer: [17000, 42000],
+    full_design_engineering: [28000, 70000],
+    not_sure: [10000, 28000],
+  },
+  siteDifficultyMultiplier: {
+    easy_access: [1, 1.02],
+    some_complexity: [1.05, 1.1],
+    tight_access: [1.12, 1.2],
+    major_complexity: [1.2, 1.34],
+    not_sure: [1.06, 1.14],
+  },
+  conditionalAdjustments: {
+    primarySuiteBathroom: {
+      yes: [15000, 38000],
+      no: [0, 0],
+      not_sure: [8000, 24000],
+    },
+    primarySuiteCloset: {
+      yes: [6000, 18000],
+      no: [0, 0],
+      not_sure: [2500, 9000],
+    },
+    bathroomAdditionType: {
+      half_bath: [-12000, -4000],
+      full_bath: [0, 0],
+      primary_bath: [12000, 36000],
+      not_sure: [2000, 14000],
+    },
+    kitchenCabinetScope: {
+      yes: [18000, 50000],
+      some: [9000, 26000],
+      no: [0, 0],
+      not_sure: [9000, 28000],
+    },
+    kitchenApplianceScope: {
+      yes: [9000, 26000],
+      no: [0, 0],
+      not_sure: [5000, 18000],
+    },
+    secondStoryReinforcement: {
+      yes: [35000, 95000],
+      possibly: [18000, 52000],
+      no: [0, 12000],
+      not_sure: [20000, 62000],
+    },
+    garageAttachment: {
+      attached: [0, 0],
+      detached: [18000, 50000],
+      not_sure: [6000, 24000],
+    },
+    garageUse: {
+      finished_living_space: [25000, 70000],
+      mixed_use: [12000, 32000],
+      utility_storage: [0, 8000],
+      not_sure: [10000, 30000],
+    },
+    guestSleepingArea: {
+      yes: [9000, 26000],
+      no: [0, 0],
+      not_sure: [5000, 18000],
+    },
+    guestKitchenette: {
+      yes: [12000, 32000],
+      no: [0, 0],
+      not_sure: [6000, 20000],
+    },
+    guestFullBathroom: {
+      yes: [18000, 42000],
+      no: [0, 0],
+      not_sure: [9000, 26000],
+    },
+    guestIndependentEntry: {
+      yes: [5000, 15000],
+      no: [0, 0],
+      not_sure: [2500, 9000],
+    },
+    otherClosestDescription: {
+      bedroom_sleeping_space: [4000, 18000],
+      living_space: [3000, 14000],
+      utility_support_space: [-6000, 4000],
+      bathroom_related: [14000, 36000],
+      kitchen_related: [18000, 45000],
+      multi_purpose: [12000, 32000],
+      not_sure: [8000, 24000],
+    },
+  },
+} as const
+
 function getFilteredOptions(question: Question, tier: string) {
   return (question.options || []).filter((option) => !option.tiers || option.tiers.includes(tier as TierKey))
 }
 
-function getAllQuestions(project: Project | undefined, tier: string) {
+function getAllQuestions(project: Project | undefined, tier: string, answers: Record<string, string> = {}) {
   if (!project?.sections) return [] as (Question & { sectionTitle: string })[]
-  if (!['kitchen', 'bathroom', 'suite'].includes(project.id) && !tier) return [] as (Question & { sectionTitle: string })[]
+  if (!['kitchen', 'bathroom', 'suite', 'addition'].includes(project.id) && !tier) return [] as (Question & { sectionTitle: string })[]
   return project.sections.flatMap((section) =>
     section.questions.map((question) => ({
       ...question,
       sectionTitle: section.title,
       options: ['kitchen', 'bathroom', 'suite'].includes(project.id) ? question.options : getFilteredOptions(question, tier),
     }))
-  )
+  ).filter((question) => !question.showWhen || question.showWhen(answers))
+}
+
+function sanitizeAnswers(project: Project | undefined, tier: string, answers: Record<string, string>) {
+  const validQuestions = getAllQuestions(project, tier, answers)
+  const nextAnswers: Record<string, string> = {}
+  for (const q of validQuestions) {
+    const current = answers[q.id]
+    if (current && q.options.some((o) => o.value === current)) nextAnswers[q.id] = current
+  }
+  return nextAnswers
 }
 
 function inferKitchenTier(answers: Record<string, string>): TierKey {
@@ -918,6 +1318,78 @@ function getBathroomSummaryLabel(questionId: string, answerValue: string, option
   return optionLabel
 }
 
+function getAdditionValue<T extends Record<string, readonly [number, number]>>(map: T, key: string | undefined, fallback: keyof T) {
+  if (key && map[key as keyof T]) return map[key as keyof T]
+  return map[fallback]
+}
+
+function hasAdditionFallbackSelections(answers: Record<string, string>) {
+  return Object.values(answers).some((value) => value === 'not_sure' || value === 'other')
+}
+
+function getAdditionSummaryLabel(questionId: string, answerValue: string, optionLabel: string) {
+  if (answerValue !== 'not_sure' && answerValue !== 'other') return optionLabel
+  if (questionId === 'additionType' && answerValue === 'other') return 'Other (mapped to closest addition scope)'
+  if (questionId === 'additionType' && answerValue === 'not_sure') return 'Not Sure (flexible addition baseline)'
+  if (answerValue === 'not_sure') return `${optionLabel} (planning assumption used)`
+  return optionLabel
+}
+
+function getAdditionTypeForPricing(answers: Record<string, string>) {
+  const rawType = answers.additionType || 'not_sure'
+  if (rawType !== 'other') return rawType
+  const mapping: Record<string, string> = {
+    bedroom_sleeping_space: 'bedroom_addition',
+    living_space: 'living_room_addition',
+    utility_support_space: 'mudroom_utility_addition',
+    bathroom_related: 'bathroom_addition',
+    kitchen_related: 'kitchen_expansion',
+    multi_purpose: 'multi_room_addition',
+    not_sure: 'multi_room_addition',
+  }
+  return mapping[answers.otherClosestDescription || 'not_sure'] || 'multi_room_addition'
+}
+
+function getAdditionKeyDrivers(answers: Record<string, string>) {
+  const sizeMap: Record<string, string> = {
+    under_200: 'A compact footprint keeps framing and finish scope focused.',
+    '200_400': 'A small-to-mid footprint balances livability with controlled construction cost.',
+    '400_600': 'A 400–600 sqft size is a common whole-room addition baseline.',
+    '600_800': 'A larger 600–800 sqft footprint raises structure, envelope, and systems scope.',
+    '800_1200': 'A substantial 800–1,200 sqft addition usually involves broader structural and systems work.',
+    '1200_plus': 'A 1,200+ sqft addition drives major shell, tie-in, and systems cost.',
+    not_sure: 'Size was marked as not sure, so a mid-size baseline was used.',
+  }
+  const structuralMap: Record<string, string> = {
+    simple_slab: 'Simple slab assumptions keep foundation costs lower.',
+    crawl_space_raised_floor: 'Raised floor / crawl space assumptions added structural complexity.',
+    major_structural_tie_in: 'Major structural tie-in expectations materially increased the range.',
+    second_story_structural: 'Second-story structural scope is one of the strongest cost drivers.',
+    not_sure: 'Structural details were not finalized, so a moderate-to-major allowance was used.',
+  }
+  const systemsMap: Record<string, string> = {
+    no_plumbing: 'No plumbing scope helped contain systems costs.',
+    sink_only: 'Limited plumbing was included for basic utility tie-ins.',
+    full_bathroom: 'Full bathroom plumbing added meaningful rough-in and fixture allowance.',
+    kitchenette_plumbing: 'Kitchen plumbing and venting requirements increased systems cost.',
+    multiple_plumbing_areas: 'Multiple plumbing zones significantly increased utility scope.',
+    not_sure: 'Plumbing scope was not finalized, so a moderate allowance was included.',
+  }
+  const finishMap: Record<string, string> = {
+    basic_builder_grade: 'Builder-grade finish expectations keep material allowances value-focused.',
+    mid_range: 'Mid-range finishes were used as the baseline expectation.',
+    high_end: 'High-end finish selections increased material and labor allowances.',
+    luxury_custom: 'Luxury/custom finish expectations pushed both low and high ranges upward.',
+    not_sure: 'Finish level was not finalized, so a mid-range assumption was used.',
+  }
+  return [
+    sizeMap[answers.additionSize || 'not_sure'],
+    structuralMap[answers.structuralScope || 'not_sure'],
+    systemsMap[answers.plumbingScope || 'not_sure'],
+    finishMap[answers.finishLevel || 'not_sure'],
+  ]
+}
+
 function calculateEstimate(project: Project | undefined, tier: string, answers: Record<string, string>) {
   if (!project) return null
   if (project.id === 'kitchen') {
@@ -1034,6 +1506,68 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
     const adjustedHigh = Math.max(finalHigh, adjustedLow + 1000)
     return { low: adjustedLow, high: adjustedHigh, summary, inferredTier: inferSuiteTier(answers) }
   }
+  if (project.id === 'addition') {
+    const resolvedAdditionType = getAdditionTypeForPricing(answers)
+    const sizeKey = (answers.additionSize as keyof typeof additionPricing.defaultSqftBySize) || 'not_sure'
+    const sqft = additionPricing.defaultSqftBySize[sizeKey] || additionPricing.defaultSqftBySize.not_sure
+    const [basePsfLow, basePsfHigh] = getAdditionValue(additionPricing.typePricePerSqft, resolvedAdditionType, 'not_sure')
+    const [finishMin, finishMax] = getAdditionValue(
+      additionPricing.finishMultiplier,
+      answers.finishLevel,
+      'mid_range'
+    )
+
+    let rawMin = sqft * basePsfLow * finishMin
+    let rawMax = sqft * basePsfHigh * finishMax
+
+    const [plumbingMin, plumbingMax] = getAdditionValue(additionPricing.plumbingAdjustments, answers.plumbingScope, 'not_sure')
+    const [hvacMin, hvacMax] = getAdditionValue(additionPricing.hvacAdjustments, answers.hvacScope, 'not_sure')
+    const [structuralMin, structuralMax] = getAdditionValue(additionPricing.structuralAdjustments, answers.structuralScope, 'not_sure')
+    const [exteriorMin, exteriorMax] = getAdditionValue(additionPricing.exteriorAdjustments, answers.exteriorScope, 'not_sure')
+    const [matchMin, matchMax] = getAdditionValue(additionPricing.matchAdjustments, answers.matchQuality, 'not_sure')
+    const [permitMin, permitMax] = getAdditionValue(additionPricing.permitDesignAdjustments, answers.permitDesignScope, 'not_sure')
+    rawMin += plumbingMin + hvacMin + structuralMin + exteriorMin + matchMin + permitMin
+    rawMax += plumbingMax + hvacMax + structuralMax + exteriorMax + matchMax + permitMax
+
+    const conditionalKeys = Object.keys(additionPricing.conditionalAdjustments) as Array<keyof typeof additionPricing.conditionalAdjustments>
+    for (const key of conditionalKeys) {
+      const questionValue = answers[key]
+      if (!questionValue) continue
+      const [adjMin, adjMax] = getAdditionValue(additionPricing.conditionalAdjustments[key], questionValue, 'not_sure')
+      rawMin += adjMin
+      rawMax += adjMax
+    }
+
+    const [siteMin, siteMax] = getAdditionValue(additionPricing.siteDifficultyMultiplier, answers.siteDifficulty, 'not_sure')
+    rawMin *= siteMin
+    rawMax *= siteMax
+
+    const midpoint = (rawMin + rawMax) / 2
+    const activeQuestionIds = getAllQuestions(project, '', answers).map((q) => q.id)
+    const answeredCount = activeQuestionIds.filter((id) => Boolean(answers[id])).length
+    const fallbackCount = activeQuestionIds.filter((id) => {
+      const value = answers[id]
+      return value === 'not_sure' || value === 'other'
+    }).length
+    const specificity = answeredCount > 0 ? Math.max((answeredCount - fallbackCount) / answeredCount, 0.35) : 0.5
+    const spread = Math.max(0.12, Math.min(0.24, 0.21 - specificity * 0.07 + fallbackCount * 0.01))
+    const finalLow = roundPresentation(midpoint * (1 - spread / 2))
+    const finalHigh = roundPresentation(midpoint * (1 + spread / 2))
+
+    const summary: Array<{ section: string; question: string; answer: string }> = []
+    for (const question of getAllQuestions(project, '', answers)) {
+      const value = answers[question.id]
+      if (!value) continue
+      const option = question.options.find((o) => o.value === value)
+      if (!option) continue
+      summary.push({ section: question.sectionTitle, question: question.label, answer: getAdditionSummaryLabel(question.id, value, option.label) })
+    }
+
+    const adjustedLow = Math.max(finalLow, 45000)
+    const adjustedHigh = Math.max(finalHigh, adjustedLow + 1000)
+    const inferredTier = midpoint > 450000 ? 'best' : midpoint > 225000 ? 'better' : 'good'
+    return { low: adjustedLow, high: adjustedHigh, summary, inferredTier }
+  }
   if (!tier) return null
   const [baseLow, baseHigh] = project.baseRanges[tier as TierKey] || [0, 0]
   let low = baseLow
@@ -1087,6 +1621,21 @@ function runEstimatorSmokeTests() {
     suiteSiteComplexity: 'not_sure',
   })
   console.assert(Boolean(suiteEstimate && suiteEstimate.low > 0 && suiteEstimate.high > suiteEstimate.low), 'suite estimate should return a realistic range with fallback selections')
+  const additionQuestions = getAllQuestions(getProject('addition'), '', { additionType: 'other' })
+  console.assert(additionQuestions.some((q) => q.id === 'otherClosestDescription'), 'addition flow should expose "closest description" when type is other')
+  const additionEstimate = calculateEstimate(getProject('addition'), '', {
+    additionType: 'not_sure',
+    additionSize: 'not_sure',
+    finishLevel: 'not_sure',
+    plumbingScope: 'not_sure',
+    hvacScope: 'not_sure',
+    structuralScope: 'not_sure',
+    exteriorScope: 'not_sure',
+    matchQuality: 'not_sure',
+    permitDesignScope: 'not_sure',
+    siteDifficulty: 'not_sure',
+  })
+  console.assert(Boolean(additionEstimate && additionEstimate.low > 0 && additionEstimate.high > additionEstimate.low), 'addition estimate should return a realistic range with fallback selections')
 }
 
 runEstimatorSmokeTests()
@@ -1192,15 +1741,19 @@ export default function App() {
   const [consultationSubmitting, setConsultationSubmitting] = useState(false)
 
   const project = useMemo(() => getProject(projectId), [projectId])
-  const requiresTierSelection = project ? !['kitchen', 'bathroom', 'suite'].includes(project.id) : true
+  const requiresTierSelection = project ? !['kitchen', 'bathroom', 'suite', 'addition'].includes(project.id) : true
   const activeTier = useMemo(() => {
     if (!project) return tier
     if (requiresTierSelection) return tier
     if (project.id === 'bathroom') return inferBathroomTier(answers)
     if (project.id === 'suite') return inferSuiteTier(answers)
+    if (project.id === 'addition') {
+      const estimateForTier = calculateEstimate(project, tier, answers)
+      return estimateForTier?.inferredTier || 'better'
+    }
     return inferKitchenTier(answers)
   }, [project, requiresTierSelection, tier, answers])
-  const activeQuestions = useMemo(() => getAllQuestions(project, tier), [project, tier])
+  const activeQuestions = useMemo(() => getAllQuestions(project, tier, answers), [project, tier, answers])
   const estimate = useMemo(() => calculateEstimate(project, tier, answers), [project, tier, answers])
   const estimateSummary = useMemo(
     () => buildEstimateSummary(project, tier, estimate, lead.fullName.trim()),
@@ -1208,11 +1761,15 @@ export default function App() {
   )
   const bathroomHasFallbackSelections = useMemo(() => hasBathroomFallbackSelections(answers), [answers])
   const suiteHasFallbackSelections = useMemo(() => hasSuiteFallbackSelections(answers), [answers])
+  const additionHasFallbackSelections = useMemo(() => hasAdditionFallbackSelections(answers), [answers])
+  const additionKeyDrivers = useMemo(() => getAdditionKeyDrivers(answers), [answers])
   const suiteKeyDrivers = useMemo(() => getSuiteKeyDrivers(answers), [answers])
   const bathroomConfidenceMessage = 'This estimate is based on your bathroom type, layout complexity, fixture selections, and finish level. Most projects with similar selections fall within this range, excluding hidden conditions or structural repairs.'
   const bathroomFallbackConfidenceMessage = 'This estimate is based on your bathroom type, layout complexity, fixture selections, and finish level. Where selections were marked as unsure or custom, we used reasonable planning assumptions to keep the estimate realistic. Final pricing may vary once exact materials and scope are confirmed.'
   const suiteConfidenceMessage = 'Based on similar Mother-in-Law suite and ADU remodels with comparable size, project type, systems scope, and finish expectations.'
   const suiteFallbackConfidenceMessage = 'Some selections used typical project assumptions (such as size, utilities, or custom scope), so this range may tighten after layout and systems details are confirmed.'
+  const additionConfidenceMessage = 'This range is tighter because your selections were specific. Addition size, structural scope, systems work, and finish level were all used to narrow pricing.'
+  const additionFallbackConfidenceMessage = 'This range is slightly wider because a few structural or systems details were marked as Not Sure or Other. We applied practical planning assumptions to keep the estimate realistic.'
   const stages = ['welcome', 'project', ...(requiresTierSelection ? ['tier'] : []), ...activeQuestions.map((q) => q.id), 'lead', 'results']
   const currentStage = stages[step] || 'welcome'
   const currentQuestion = activeQuestions.find((q) => q.id === currentStage)
@@ -1252,13 +1809,7 @@ export default function App() {
 
   function resetAnswersForTier(nextTier: string) {
     if (!project) return {}
-    const validQuestions = getAllQuestions(project, nextTier)
-    const nextAnswers: Record<string, string> = {}
-    for (const q of validQuestions) {
-      const current = answers[q.id]
-      if (q.options.some((o) => o.value === current)) nextAnswers[q.id] = current
-    }
-    return nextAnswers
+    return sanitizeAnswers(project, nextTier, answers)
   }
 
   function handleProjectSelect(id: string) {
@@ -1273,7 +1824,10 @@ export default function App() {
   }
 
   function updateAnswer(questionId: string, value: string) {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }))
+    setAnswers((prev) => {
+      const nextAnswers = { ...prev, [questionId]: value }
+      return sanitizeAnswers(project, tier, nextAnswers)
+    })
   }
 
   function openConsultationModal() {
@@ -1402,6 +1956,8 @@ export default function App() {
           : bathroomConfidenceMessage
         : project.id === 'suite'
           ? `${suiteConfidenceMessage} ${suiteHasFallbackSelections ? suiteFallbackConfidenceMessage : ''}`.trim()
+        : project.id === 'addition'
+          ? `${additionHasFallbackSelections ? additionFallbackConfidenceMessage : additionConfidenceMessage} Additions can vary based on engineering, tie-ins, and permitting, so this remains an early planning range.`
         : 'This estimate is a planning range based on the selections above. Final pricing depends on field conditions, structural requirements, measurements, permits, engineering, and material availability.',
       11,
       16
@@ -1501,6 +2057,7 @@ export default function App() {
       <div className="card-pad">
         <div className="kicker" style={{ color: BRAND.forest }}>
           {project?.id === 'kitchen' && kitchenSectionIcons[currentQuestion.sectionTitle] ? `${kitchenSectionIcons[currentQuestion.sectionTitle]} ` : ''}
+          {project?.id === 'addition' && additionSectionIcons[currentQuestion.sectionTitle] ? `${additionSectionIcons[currentQuestion.sectionTitle]} ` : ''}
           {currentQuestion.sectionTitle}
         </div>
         <div className="section-title top-sm" style={{ color: BRAND.ink }}>{currentQuestion.label}</div>
@@ -1511,7 +2068,9 @@ export default function App() {
               ? 'Choose the option that best reflects your planned bathroom scope.'
               : project?.id === 'suite'
                 ? 'Choose the option that best matches your planned suite scope. If you are unsure, select “Not sure” and we will apply realistic assumptions.'
-              : 'Your selected tier filters the options shown below.'}
+                : project?.id === 'addition'
+                  ? 'Choose the option that best matches your project. “Not Sure” and “Other” keep your estimate moving with practical assumptions.'
+                : 'Your selected tier filters the options shown below.'}
         </div>
         {estimate ? (
           <div className="section-copy top-sm" style={{ color: BRAND.forest }}>
@@ -1575,6 +2134,8 @@ export default function App() {
                 ? `Estimated Bathroom Remodel: ${rangeToText([estimate.low, estimate.high])}`
                 : project.id === 'suite'
                   ? `Estimated Mother-in-Law Suite Remodel: ${rangeToText([estimate.low, estimate.high])}`
+                  : project.id === 'addition'
+                    ? `Estimated Home Addition: ${rangeToText([estimate.low, estimate.high])}`
                 : rangeToText([estimate.low, estimate.high])}
           </div>
           <div className="section-copy">
@@ -1586,6 +2147,10 @@ export default function App() {
                   : 'Based on your bathroom type, layout complexity, fixture selections, and finish level.'
                 : project.id === 'suite'
                   ? suiteConfidenceMessage
+                  : project.id === 'addition'
+                    ? additionHasFallbackSelections
+                      ? additionFallbackConfidenceMessage
+                      : additionConfidenceMessage
                 : 'Based on your selected scope, finish level, and project type.'}
           </div>
           {project.id === 'kitchen' ? <div className="section-copy">Most homeowners spend around {rangeToText([estimate.low, estimate.high])} for a kitchen like this</div> : null}
@@ -1594,6 +2159,16 @@ export default function App() {
               <div className="section-subtitle" style={{ color: BRAND.ink }}>What drove this range</div>
               <ul className="top-sm section-copy" style={{ margin: 0, paddingLeft: '1rem' }}>
                 {suiteKeyDrivers.map((driver) => (
+                  <li key={driver}>{driver}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {project.id === 'addition' ? (
+            <div className="top-md">
+              <div className="section-subtitle" style={{ color: BRAND.ink }}>What drove this range</div>
+              <ul className="top-sm section-copy" style={{ margin: 0, paddingLeft: '1rem' }}>
+                {additionKeyDrivers.map((driver) => (
                   <li key={driver}>{driver}</li>
                 ))}
               </ul>
@@ -1622,6 +2197,8 @@ export default function App() {
                 : bathroomConfidenceMessage
               : project.id === 'suite'
                 ? `${suiteConfidenceMessage} ${suiteHasFallbackSelections ? suiteFallbackConfidenceMessage : ''}`.trim()
+                : project.id === 'addition'
+                  ? `${additionHasFallbackSelections ? additionFallbackConfidenceMessage : additionConfidenceMessage} Additions can vary significantly based on engineering, tie-ins, and permit requirements, so this estimate is an early planning range.`
               : 'This estimate is a planning range based on the selections above. Final pricing depends on field conditions, structural requirements, measurements, permits, engineering, and material availability.'}
           </div>
         </div>
