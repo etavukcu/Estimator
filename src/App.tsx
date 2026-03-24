@@ -779,71 +779,67 @@ function getProject(projectId: string) {
 }
 
 const kitchenPricing = {
-  sizeMap: {
-    under_100: 90,
-    '100_150': 125,
-    '150_250': 200,
-    '250_400': 325,
-    '400_plus': 450,
-    not_sure: 200,
-  },
-  pricePerSqft: {
-    good: [190, 235],
-    better: [235, 295],
-    best: [295, 365],
+  baseMinimum: 30000,
+  sizeAdders: {
+    under_100: [0, 4000],
+    '100_150': [3000, 9000],
+    '150_250': [8000, 16000],
+    '250_400': [15000, 26000],
+    '400_plus': [24000, 42000],
+    not_sure: [7000, 15000],
   },
   layout: {
-    keep: { score: 1, adjustment: 0 },
-    minor: { score: 2, adjustment: 5000 },
-    full: { score: 3, adjustment: 12000 },
+    keep: { score: 1, adders: [0, 1000] },
+    minor: { score: 2, adders: [3000, 9000] },
+    full: { score: 3, adders: [9000, 18000] },
   },
   cabinets: {
-    refinish: { score: 1, adjustment: -3000 },
-    stock: { score: 1, adjustment: 0 },
-    semi_custom: { score: 2, adjustment: 4000 },
-    custom: { score: 3, adjustment: 10000 },
-    not_sure: { score: 2, adjustment: 2000 },
+    refinish: { score: 1, adders: [0, 3000] },
+    stock: { score: 1, adders: [2500, 7000] },
+    semi_custom: { score: 2, adders: [7000, 15000] },
+    custom: { score: 3, adders: [14000, 26000] },
+    not_sure: { score: 2, adders: [7000, 14000] },
   },
   countertops: {
-    laminate: { score: 1, adjustment: -2000 },
-    quartz: { score: 2, adjustment: 1500 },
-    granite: { score: 2, adjustment: 2500 },
-    marble: { score: 3, adjustment: 6000 },
-    not_sure: { score: 2, adjustment: 1500 },
+    laminate: { score: 1, adders: [1000, 3000] },
+    quartz: { score: 2, adders: [3500, 8000] },
+    granite: { score: 2, adders: [4500, 10000] },
+    marble: { score: 3, adders: [9000, 18000] },
+    not_sure: { score: 2, adders: [4000, 9000] },
   },
   appliances: {
-    keep: { score: 1, adjustment: -4000 },
-    standard: { score: 1, adjustment: 0 },
-    premium: { score: 2, adjustment: 4000 },
-    luxury: { score: 3, adjustment: 9000 },
-    not_sure: { score: 2, adjustment: 2000 },
+    keep: { score: 1, adders: [0, 2000] },
+    standard: { score: 1, adders: [3000, 7000] },
+    premium: { score: 2, adders: [7000, 14000] },
+    luxury: { score: 3, adders: [14000, 26000] },
+    not_sure: { score: 2, adders: [6000, 12000] },
   },
   flooring: {
-    keep: { score: 1, adjustment: -2000 },
-    lvp: { score: 1, adjustment: 0 },
-    tile: { score: 2, adjustment: 2000 },
-    hardwood: { score: 3, adjustment: 5000 },
-    not_sure: { score: 2, adjustment: 1500 },
+    keep: { score: 1, adders: [0, 1500] },
+    lvp: { score: 1, adders: [1500, 4000] },
+    tile: { score: 2, adders: [3500, 8000] },
+    hardwood: { score: 3, adders: [6000, 12000] },
+    not_sure: { score: 2, adders: [3000, 7000] },
   },
   backsplash: {
-    none: { score: 1, adjustment: -1000 },
-    standard: { score: 1, adjustment: 0 },
-    upgraded: { score: 2, adjustment: 1500 },
-    full: { score: 3, adjustment: 4000 },
-    not_sure: { score: 2, adjustment: 1000 },
+    none: { score: 1, adders: [0, 500] },
+    standard: { score: 1, adders: [800, 2500] },
+    upgraded: { score: 2, adders: [2500, 5500] },
+    full: { score: 3, adders: [5000, 10000] },
+    not_sure: { score: 2, adders: [2200, 5000] },
   },
   island: {
-    none: { score: 1, adjustment: 0 },
-    keep: { score: 1, adjustment: 0 },
-    add: { score: 2, adjustment: 4000 },
-    upgrade: { score: 3, adjustment: 8000 },
-    not_sure: { score: 2, adjustment: 3000 },
+    none: { score: 1, adders: [0, 1000] },
+    keep: { score: 1, adders: [500, 2000] },
+    add: { score: 2, adders: [4000, 9000] },
+    upgrade: { score: 3, adders: [8000, 16000] },
+    not_sure: { score: 2, adders: [5000, 11000] },
   },
   lighting: {
-    basic: { score: 1, adjustment: 0 },
-    recessed: { score: 2, adjustment: 2000 },
-    designer: { score: 3, adjustment: 5000 },
-    not_sure: { score: 2, adjustment: 1500 },
+    basic: { score: 1, adders: [800, 2000] },
+    recessed: { score: 2, adders: [2500, 5500] },
+    designer: { score: 3, adders: [5000, 11000] },
+    not_sure: { score: 2, adders: [2200, 5000] },
   },
 } as const
 
@@ -876,25 +872,26 @@ const projectMinimums: Record<string, number> = {
 const derivedTierProjectIds = new Set(['kitchen', 'bathroom', 'suite', 'addition'])
 
 const bathroomPricing = {
-  baseRangeByType: {
-    half_bath: [6000, 12000],
-    full_bathroom: [12000, 22000],
-    primary_bathroom: [20000, 40000],
+  baseMinimum: 15000,
+  typeAdders: {
+    half_bath: [0, 4000],
+    full_bathroom: [3000, 9000],
+    primary_bathroom: [9000, 20000],
   },
-  sizeMultiplier: {
-    under_40: [0.9, 0.9],
-    '40_80': [1, 1],
-    '80_120': [1.1, 1.1],
-    '120_plus': [1.2, 1.2],
-    not_sure_estimate: [1, 1.1],
+  sizeAdders: {
+    under_40: [0, 2500],
+    '40_80': [2000, 6000],
+    '80_120': [5000, 12000],
+    '120_plus': [9000, 19000],
+    not_sure_estimate: [3500, 9000],
   },
-  layoutAdjustments: {
+  layoutAdders: {
     none: [0, 0],
     minor: [2000, 5000],
     major: [6000, 12000],
-    not_sure_estimate: [2000, 8000],
+    not_sure_estimate: [3000, 8000],
   },
-  showerTubAdjustments: {
+  showerTubAdders: {
     refresh: [0, 0],
     standard_replacement: [2000, 5000],
     walk_in_tiled: [6000, 12000],
@@ -902,73 +899,74 @@ const bathroomPricing = {
     not_sure_estimate: [4000, 12000],
     other_custom_setup: [12000, 22000],
   },
-  vanityAdjustments: {
+  vanityAdders: {
     basic_prefab: [500, 1500],
     semi_custom: [2000, 5000],
     custom_double: [5000, 12000],
-    not_sure_estimate: [2000, 5000],
+    not_sure_estimate: [2500, 6500],
     other: [5000, 10000],
   },
-  tileAdjustments: {
+  tileAdders: {
     minimal: [1000, 3000],
     standard: [4000, 8000],
     full: [8000, 15000],
     luxury: [15000, 30000],
     not_sure_estimate: [4000, 12000],
   },
-  finishWeighting: {
-    budget: { min: 0.92, max: 0.96, spread: 0.11 },
-    standard: { min: 0.96, max: 1, spread: 0.13 },
-    mid_range: { min: 1.01, max: 1.05, spread: 0.15 },
-    high_end: { min: 1.05, max: 1.1, spread: 0.12 },
-    not_sure_estimate: { min: 0.99, max: 1.03, spread: 0.14 },
+  finishAdders: {
+    budget: [0, 2000],
+    standard: [2500, 7000],
+    mid_range: [5000, 12000],
+    high_end: [9000, 20000],
+    not_sure_estimate: [4500, 11000],
   },
 } as const
 
 const suitePricing = {
-  baseRangeBySize: {
-    '300_500': [90000, 140000],
-    '500_800': [130000, 200000],
-    '800_1200': [180000, 300000],
-    '1200_plus': [250000, 400000],
-    not_sure: [150000, 230000],
+  baseMinimum: 32000,
+  sizeAdders: {
+    '300_500': [6000, 22000],
+    '500_800': [18000, 45000],
+    '800_1200': [35000, 78000],
+    '1200_plus': [55000, 120000],
+    not_sure: [22000, 52000],
   },
-  projectTypeMultiplier: {
-    convert_existing: [0.7, 0.82],
-    attached_addition: [1, 1],
-    detached_structure: [1.28, 1.42],
-    other: [1.06, 1.14],
-    not_sure: [1, 1],
+  projectTypeAdders: {
+    convert_existing: [0, 12000],
+    attached_addition: [12000, 26000],
+    detached_structure: [26000, 55000],
+    other: [18000, 36000],
+    not_sure: [14000, 30000],
   },
-  finishMultiplier: {
-    standard: [0.9, 0.92],
-    mid_range: [1, 1],
-    high_end: [1.16, 1.23],
-    other: [1.04, 1.08],
-    not_sure: [1, 1],
+  finishAdders: {
+    standard: [0, 12000],
+    mid_range: [7000, 20000],
+    high_end: [18000, 42000],
+    other: [9000, 26000],
+    not_sure: [7000, 22000],
   },
-  siteComplexityMultiplier: {
-    easy_access: [1, 1],
-    tight_access: [1.05, 1.1],
-    major_challenges: [1.15, 1.25],
-    other: [1.1, 1.17],
-    not_sure: [1.04, 1.08],
+  siteComplexityAdders: {
+    easy_access: [0, 6000],
+    tight_access: [6000, 18000],
+    major_challenges: [16000, 36000],
+    other: [10000, 24000],
+    not_sure: [8000, 20000],
   },
-  kitchenAdjustments: {
-    none: [-30000, -15000],
+  kitchenAdders: {
+    none: [0, 2000],
     kitchenette: [10000, 25000],
     full_kitchen: [25000, 60000],
     other: [18000, 42000],
     not_sure: [12000, 28000],
   },
-  bathroomAdjustments: {
-    one_standard: [0, 0],
+  bathroomAdders: {
+    one_standard: [5000, 14000],
     two_bathrooms: [15000, 30000],
     one_luxury: [10000, 25000],
     other: [12000, 22000],
-    not_sure: [0, 0],
+    not_sure: [8000, 20000],
   },
-  utilitiesAdjustments: {
+  utilitiesAdders: {
     existing_accessible: [0, 0],
     some_upgrades: [10000, 25000],
     full_new_systems: [25000, 60000],
@@ -978,6 +976,7 @@ const suitePricing = {
 } as const
 
 const additionPricing = {
+  baseMinimum: 52000,
   defaultSqftBySize: {
     under_200: 160,
     '200_400': 300,
@@ -987,27 +986,27 @@ const additionPricing = {
     '1200_plus': 1400,
     not_sure: 600,
   },
-  typePricePerSqft: {
-    bedroom_addition: [220, 300],
-    primary_suite_addition: [300, 410],
-    bathroom_addition: [320, 460],
-    living_room_addition: [235, 325],
-    kitchen_expansion: [290, 420],
-    second_story_addition: [360, 520],
-    garage_addition_conversion: [170, 320],
-    in_law_guest_space_addition: [285, 425],
-    sunroom_enclosed_patio_addition: [190, 295],
-    mudroom_utility_addition: [170, 270],
-    multi_room_addition: [270, 395],
-    other: [250, 365],
-    not_sure: [255, 375],
+  typeAddersBySize: {
+    bedroom_addition: [12000, 36000],
+    primary_suite_addition: [24000, 62000],
+    bathroom_addition: [18000, 52000],
+    living_room_addition: [13000, 38000],
+    kitchen_expansion: [22000, 58000],
+    second_story_addition: [38000, 98000],
+    garage_addition_conversion: [8000, 32000],
+    in_law_guest_space_addition: [26000, 70000],
+    sunroom_enclosed_patio_addition: [9000, 28000],
+    mudroom_utility_addition: [7000, 22000],
+    multi_room_addition: [28000, 76000],
+    other: [24000, 68000],
+    not_sure: [22000, 64000],
   },
-  finishMultiplier: {
-    basic_builder_grade: [0.9, 0.95],
-    mid_range: [1, 1.06],
-    high_end: [1.12, 1.24],
-    luxury_custom: [1.28, 1.42],
-    not_sure: [1, 1.08],
+  finishAdders: {
+    basic_builder_grade: [0, 10000],
+    mid_range: [7000, 22000],
+    high_end: [18000, 42000],
+    luxury_custom: [28000, 62000],
+    not_sure: [9000, 28000],
   },
   plumbingAdjustments: {
     no_plumbing: [0, 0],
@@ -1068,7 +1067,7 @@ const additionPricing = {
       not_sure: [2500, 9000],
     },
     bathroomAdditionType: {
-      half_bath: [-12000, -4000],
+      half_bath: [0, 6000],
       full_bath: [0, 0],
       primary_bath: [12000, 36000],
       not_sure: [2000, 14000],
@@ -1124,7 +1123,7 @@ const additionPricing = {
     otherClosestDescription: {
       bedroom_sleeping_space: [4000, 18000],
       living_space: [3000, 14000],
-      utility_support_space: [-6000, 4000],
+      utility_support_space: [0, 6000],
       bathroom_related: [14000, 36000],
       kitchen_related: [18000, 45000],
       multi_purpose: [12000, 32000],
@@ -1210,7 +1209,7 @@ function roundPresentation(value: number) {
 }
 
 function getKitchenCategoryOption(category: KitchenScoredCategory, value: string | undefined) {
-  const bucket = kitchenPricing[category] as Record<string, { score: number; adjustment: number }>
+  const bucket = kitchenPricing[category] as Record<string, { score: number; adders: readonly [number, number] }>
   if (value && bucket[value]) return bucket[value]
   if (bucket.not_sure) return bucket.not_sure
   return bucket.keep
@@ -1410,35 +1409,29 @@ function applyProjectMinimums(projectId: string, calculatedMin: number, calculat
   if (!projectMinimum) {
     return { finalMin: calculatedMin, finalMax: calculatedMax, isMinimumApplied: false }
   }
-
-  const nearMinimumThreshold = projectMinimum * 1.1
-  const shouldSnapToMinimum = calculatedMin >= projectMinimum && calculatedMin <= nearMinimumThreshold
-  const isMinimumApplied = calculatedMin < projectMinimum || shouldSnapToMinimum
-  const finalMin = isMinimumApplied ? projectMinimum : Math.max(calculatedMin, projectMinimum)
-  const finalMax = Math.max(calculatedMax, projectMinimum * 1.2)
-
-  return { finalMin, finalMax, isMinimumApplied }
+  const finalMin = Math.max(calculatedMin, projectMinimum)
+  const finalMax = Math.max(calculatedMax, finalMin + 500)
+  return { finalMin, finalMax, isMinimumApplied: finalMin === projectMinimum }
 }
 
 function calculateEstimate(project: Project | undefined, tier: string, answers: Record<string, string>) {
   if (!project) return null
   if (project.id === 'kitchen') {
     const kitchenTier = inferKitchenTier(answers)
-    const sizeKey = (answers.size as keyof typeof kitchenPricing.sizeMap) || 'not_sure'
-    const sqft = kitchenPricing.sizeMap[sizeKey] || kitchenPricing.sizeMap.not_sure
-    const [minPsf, maxPsf] = kitchenPricing.pricePerSqft[kitchenTier]
-    const baseLow = sqft * minPsf
-    const baseHigh = sqft * maxPsf
-    const adjustments = kitchenScoredCategories.reduce((total, category) => {
+    const sizeKey = (answers.size as keyof typeof kitchenPricing.sizeAdders) || 'not_sure'
+    const [sizeLowAdder, sizeHighAdder] = kitchenPricing.sizeAdders[sizeKey] || kitchenPricing.sizeAdders.not_sure
+    const categoryAdders = kitchenScoredCategories.reduce(
+      (total, category) => {
       const value = answers[category]
       const option = getKitchenCategoryOption(category, value)
-      return total + option.adjustment
-    }, 0)
-    const rawLow = baseLow + adjustments
-    const rawHigh = baseHigh + adjustments
-    const mid = (rawLow + rawHigh) / 2
-    const finalLow = roundPresentation(mid * 0.9)
-    const finalHigh = roundPresentation(mid * 1.1)
+        return [total[0] + option.adders[0], total[1] + option.adders[1]] as [number, number]
+      },
+      [0, 0] as [number, number]
+    )
+    const rawLow = kitchenPricing.baseMinimum + sizeLowAdder + categoryAdders[0]
+    const rawHigh = kitchenPricing.baseMinimum + sizeHighAdder + categoryAdders[1]
+    const finalLow = roundPresentation(rawLow)
+    const finalHigh = roundPresentation(rawHigh)
     const summary: Array<{ section: string; question: string; answer: string }> = []
     for (const question of getAllQuestions(project, kitchenTier)) {
       const value = answers[question.id]
@@ -1453,34 +1446,20 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
   if (project.id === 'bathroom') {
     const bathroomType = answers.bathroomType || 'full_bathroom'
     const size = answers.bathroomSize || '40_80'
-    const [baseMin, baseMax] = getBathroomAdjustmentValue(bathroomPricing.baseRangeByType, bathroomType, 'full_bathroom')
-    const [sizeMinMultiplier, sizeMaxMultiplier] = getBathroomAdjustmentValue(bathroomPricing.sizeMultiplier, size, '40_80')
-    let rawMin = baseMin * sizeMinMultiplier
-    let rawMax = baseMax * sizeMaxMultiplier
-
-    const [layoutMin, layoutMax] = getBathroomAdjustmentValue(bathroomPricing.layoutAdjustments, answers.bathLayout, 'none')
-    const [showerMin, showerMax] = getBathroomAdjustmentValue(bathroomPricing.showerTubAdjustments, answers.showerTub, 'refresh')
-    const [vanityMin, vanityMax] = getBathroomAdjustmentValue(bathroomPricing.vanityAdjustments, answers.vanity, 'basic_prefab')
-    const [tileMin, tileMax] = getBathroomAdjustmentValue(bathroomPricing.tileAdjustments, answers.tile, 'minimal')
-    rawMin += layoutMin + showerMin + vanityMin + tileMin
-    rawMax += layoutMax + showerMax + vanityMax + tileMax
-
+    const [typeLow, typeHigh] = getBathroomAdjustmentValue(bathroomPricing.typeAdders, bathroomType, 'full_bathroom')
+    const [sizeLow, sizeHigh] = getBathroomAdjustmentValue(bathroomPricing.sizeAdders, size, '40_80')
+    const [layoutLow, layoutHigh] = getBathroomAdjustmentValue(bathroomPricing.layoutAdders, answers.bathLayout, 'none')
+    const [showerLow, showerHigh] = getBathroomAdjustmentValue(bathroomPricing.showerTubAdders, answers.showerTub, 'refresh')
+    const [vanityLow, vanityHigh] = getBathroomAdjustmentValue(bathroomPricing.vanityAdders, answers.vanity, 'basic_prefab')
+    const [tileLow, tileHigh] = getBathroomAdjustmentValue(bathroomPricing.tileAdders, answers.tile, 'minimal')
     const finishLevel = answers.finishLevel || 'standard'
-    const weighting = bathroomPricing.finishWeighting[finishLevel as keyof typeof bathroomPricing.finishWeighting] || bathroomPricing.finishWeighting.standard
-    const weightedMin = rawMin * weighting.min
-    const weightedMax = rawMax * weighting.max
-    const mid = (weightedMin + weightedMax) / 2
-
-    const confidenceSelections = [answers.bathLayout, answers.showerTub, answers.vanity, answers.tile, answers.finishLevel].filter(Boolean).length
-    const consistencyBoost =
-      answers.finishLevel === 'high_end' && (answers.showerTub === 'luxury_custom' || answers.tile === 'luxury')
-        ? 0.85
-        : answers.finishLevel === 'budget' && answers.showerTub === 'refresh' && answers.tile === 'minimal'
-          ? 0.88
-          : 1
-    const breadth = Math.max(weighting.spread - confidenceSelections * 0.005, 0.1) * consistencyBoost
-    const finalLow = roundPresentation(mid * (1 - breadth / 2))
-    const finalHigh = roundPresentation(mid * (1 + breadth / 2))
+    const [finishLow, finishHigh] = getBathroomAdjustmentValue(bathroomPricing.finishAdders, finishLevel, 'standard')
+    const finalLow = roundPresentation(
+      bathroomPricing.baseMinimum + typeLow + sizeLow + layoutLow + showerLow + vanityLow + tileLow + finishLow
+    )
+    const finalHigh = roundPresentation(
+      bathroomPricing.baseMinimum + typeHigh + sizeHigh + layoutHigh + showerHigh + vanityHigh + tileHigh + finishHigh
+    )
 
     const summary: Array<{ section: string; question: string; answer: string }> = []
     for (const question of getAllQuestions(project, '')) {
@@ -1495,32 +1474,19 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
   }
   if (project.id === 'suite') {
     const size = answers.suiteSize || 'not_sure'
-    const [baseLow, baseHigh] = getSuiteAdjustmentValue(suitePricing.baseRangeBySize, size, 'not_sure')
-    let rawMin = baseLow
-    let rawMax = baseHigh
-
-    const [projectMin, projectMax] = getSuiteAdjustmentValue(suitePricing.projectTypeMultiplier, answers.suiteProjectType, 'not_sure')
-    const [finishMin, finishMax] = getSuiteAdjustmentValue(suitePricing.finishMultiplier, answers.suiteFinish, 'not_sure')
-    const [siteMin, siteMax] = getSuiteAdjustmentValue(suitePricing.siteComplexityMultiplier, answers.suiteSiteComplexity, 'not_sure')
-    rawMin *= projectMin * finishMin * siteMin
-    rawMax *= projectMax * finishMax * siteMax
-
-    const [kitchenMin, kitchenMax] = getSuiteAdjustmentValue(suitePricing.kitchenAdjustments, answers.suiteKitchen, 'not_sure')
-    const [bathMin, bathMax] = getSuiteAdjustmentValue(suitePricing.bathroomAdjustments, answers.suiteBathroom, 'not_sure')
-    const [utilitiesMin, utilitiesMax] = getSuiteAdjustmentValue(suitePricing.utilitiesAdjustments, answers.suiteUtilities, 'not_sure')
-    rawMin += kitchenMin + bathMin + utilitiesMin
-    rawMax += kitchenMax + bathMax + utilitiesMax
-
-    const midpoint = (rawMin + rawMax) / 2
-    const selectionCount = [answers.suiteSize, answers.suiteProjectType, answers.suiteKitchen, answers.suiteBathroom, answers.suiteUtilities, answers.suiteFinish, answers.suiteSiteComplexity].filter(Boolean).length
-    const fallbackCount = [answers.suiteSize, answers.suiteProjectType, answers.suiteKitchen, answers.suiteBathroom, answers.suiteUtilities, answers.suiteFinish, answers.suiteSiteComplexity].filter(
-      (value) => value === 'not_sure' || value === 'other'
-    ).length
-    const baseSpread = Math.max(0.22 - selectionCount * 0.01, 0.13)
-    const fallbackSpread = Math.min(fallbackCount * 0.008, 0.04)
-    const moderatedSpread = Math.min(baseSpread + fallbackSpread, 0.2)
-    const finalLow = roundPresentation(midpoint * (1 - moderatedSpread / 2))
-    const finalHigh = roundPresentation(midpoint * (1 + moderatedSpread / 2))
+    const [sizeLow, sizeHigh] = getSuiteAdjustmentValue(suitePricing.sizeAdders, size, 'not_sure')
+    const [projectLow, projectHigh] = getSuiteAdjustmentValue(suitePricing.projectTypeAdders, answers.suiteProjectType, 'not_sure')
+    const [finishLow, finishHigh] = getSuiteAdjustmentValue(suitePricing.finishAdders, answers.suiteFinish, 'not_sure')
+    const [siteLow, siteHigh] = getSuiteAdjustmentValue(suitePricing.siteComplexityAdders, answers.suiteSiteComplexity, 'not_sure')
+    const [kitchenLow, kitchenHigh] = getSuiteAdjustmentValue(suitePricing.kitchenAdders, answers.suiteKitchen, 'not_sure')
+    const [bathLow, bathHigh] = getSuiteAdjustmentValue(suitePricing.bathroomAdders, answers.suiteBathroom, 'not_sure')
+    const [utilitiesLow, utilitiesHigh] = getSuiteAdjustmentValue(suitePricing.utilitiesAdders, answers.suiteUtilities, 'not_sure')
+    const finalLow = roundPresentation(
+      suitePricing.baseMinimum + sizeLow + projectLow + finishLow + siteLow + kitchenLow + bathLow + utilitiesLow
+    )
+    const finalHigh = roundPresentation(
+      suitePricing.baseMinimum + sizeHigh + projectHigh + finishHigh + siteHigh + kitchenHigh + bathHigh + utilitiesHigh
+    )
 
     const summary: Array<{ section: string; question: string; answer: string }> = []
     for (const question of getAllQuestions(project, '')) {
@@ -1537,16 +1503,11 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
   if (project.id === 'addition') {
     const resolvedAdditionType = getAdditionTypeForPricing(answers)
     const sizeKey = (answers.additionSize as keyof typeof additionPricing.defaultSqftBySize) || 'not_sure'
-    const sqft = additionPricing.defaultSqftBySize[sizeKey] || additionPricing.defaultSqftBySize.not_sure
-    const [basePsfLow, basePsfHigh] = getAdditionValue(additionPricing.typePricePerSqft, resolvedAdditionType, 'not_sure')
-    const [finishMin, finishMax] = getAdditionValue(
-      additionPricing.finishMultiplier,
-      answers.finishLevel,
-      'mid_range'
-    )
-
-    let rawMin = sqft * basePsfLow * finishMin
-    let rawMax = sqft * basePsfHigh * finishMax
+    const sizeWeight = (additionPricing.defaultSqftBySize[sizeKey] || additionPricing.defaultSqftBySize.not_sure) / additionPricing.defaultSqftBySize.not_sure
+    const [baseTypeLow, baseTypeHigh] = getAdditionValue(additionPricing.typeAddersBySize, resolvedAdditionType, 'not_sure')
+    const [finishLow, finishHigh] = getAdditionValue(additionPricing.finishAdders, answers.finishLevel, 'mid_range')
+    let rawMin = additionPricing.baseMinimum + baseTypeLow * sizeWeight + finishLow
+    let rawMax = additionPricing.baseMinimum + baseTypeHigh * sizeWeight + finishHigh
 
     const [plumbingMin, plumbingMax] = getAdditionValue(additionPricing.plumbingAdjustments, answers.plumbingScope, 'not_sure')
     const [hvacMin, hvacMax] = getAdditionValue(additionPricing.hvacAdjustments, answers.hvacScope, 'not_sure')
@@ -1567,20 +1528,10 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
     }
 
     const [siteMin, siteMax] = getAdditionValue(additionPricing.siteDifficultyMultiplier, answers.siteDifficulty, 'not_sure')
-    rawMin *= siteMin
-    rawMax *= siteMax
-
-    const midpoint = (rawMin + rawMax) / 2
-    const activeQuestionIds = getAllQuestions(project, '', answers).map((q) => q.id)
-    const answeredCount = activeQuestionIds.filter((id) => Boolean(answers[id])).length
-    const fallbackCount = activeQuestionIds.filter((id) => {
-      const value = answers[id]
-      return value === 'not_sure' || value === 'other'
-    }).length
-    const specificity = answeredCount > 0 ? Math.max((answeredCount - fallbackCount) / answeredCount, 0.35) : 0.5
-    const spread = Math.max(0.12, Math.min(0.24, 0.21 - specificity * 0.07 + fallbackCount * 0.01))
-    const finalLow = roundPresentation(midpoint * (1 - spread / 2))
-    const finalHigh = roundPresentation(midpoint * (1 + spread / 2))
+    rawMin += rawMin * (siteMin - 1)
+    rawMax += rawMax * (siteMax - 1)
+    const finalLow = roundPresentation(rawMin)
+    const finalHigh = roundPresentation(rawMax)
 
     const summary: Array<{ section: string; question: string; answer: string }> = []
     for (const question of getAllQuestions(project, '', answers)) {
@@ -1591,7 +1542,8 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
       summary.push({ section: question.sectionTitle, question: question.label, answer: getAdditionSummaryLabel(question.id, value, option.label) })
     }
 
-    const inferredTier: TierKey = midpoint > 450000 ? 'best' : midpoint > 225000 ? 'better' : 'good'
+    const midpoint = (finalLow + finalHigh) / 2
+    const inferredTier: TierKey = midpoint > 240000 ? 'best' : midpoint > 130000 ? 'better' : 'good'
     const { finalMin, finalMax, isMinimumApplied } = applyProjectMinimums(project.id, finalLow, finalHigh)
     return { low: finalMin, high: Math.max(finalMax, finalMin + 1000), summary, inferredTier, isMinimumApplied }
   }
@@ -1771,7 +1723,7 @@ function OptionCards({
                 <div className="option-title">{option.label}</div>
                 {optionEstimate ? (
                   <div className={`option-helper ${active ? 'option-helper-active' : ''}`}>
-                    Estimated range with this choice: {rangeToText([optionEstimate.low, optionEstimate.high])}
+                    Estimated investment with this choice so far: {rangeToText([optionEstimate.low, optionEstimate.high])}
                   </div>
                 ) : null}
                 {option.helper ? <div className={`option-helper ${active ? 'option-helper-active' : ''}`}>{option.helper}</div> : null}
@@ -2158,7 +2110,11 @@ export default function App() {
         </div>
         {estimate ? (
           <div className="section-copy top-sm" style={{ color: BRAND.forest }}>
-            Current estimated range: {rangeToText([estimate.low, estimate.high])}
+            Based on your selections so far: {rangeToText([estimate.low, estimate.high])}
+          </div>
+        ) : project ? (
+          <div className="section-copy top-sm" style={{ color: BRAND.forest }}>
+            Starting from {currency(projectMinimums[project.id] || 0)}. Your estimate builds as you select scope, finishes, and features.
           </div>
         ) : null}
         <div className="top-lg">
@@ -2198,7 +2154,7 @@ export default function App() {
           <div className="stack-md top-lg">
             <InfoBlock label="Project" value={project?.name || '-'} />
             <InfoBlock label={project?.id && derivedTierProjectIds.has(project.id) ? 'Inferred tier' : 'Selected tier'} value={activeTier ? TIERS[activeTier as TierKey].label : '-'} pill />
-            <InfoBlock label="Current planning range" value={estimate ? rangeToText([estimate.low, estimate.high]) : '-'} range />
+            <InfoBlock label="Estimated investment so far" value={estimate ? rangeToText([estimate.low, estimate.high]) : '-'} range />
           </div>
           <div className="info-box top-xl">When you continue, we'll generate your planning range and downloadable PDF summary.</div>
         </div>
@@ -2210,21 +2166,21 @@ export default function App() {
     <div className="layout-two-results">
       <Card>
         <div className="card-pad">
-          <div className="kicker" style={{ color: BRAND.forest }}>Your Planning Range</div>
+          <div className="kicker" style={{ color: BRAND.forest }}>Your Estimated Range</div>
           <div className="range-title" style={{ backgroundColor: BRAND.ink, color: 'white' }}>
             {project.id === 'kitchen'
-              ? `Estimated Kitchen Remodel: ${rangeToText([estimate.low, estimate.high])}`
+              ? `Kitchen Remodel Investment: ${rangeToText([estimate.low, estimate.high])}`
               : project.id === 'bathroom'
-                ? `Estimated Bathroom Remodel: ${rangeToText([estimate.low, estimate.high])}`
+                ? `Bathroom Remodel Investment: ${rangeToText([estimate.low, estimate.high])}`
                 : project.id === 'suite'
-                  ? `Estimated Mother-in-Law Suite Remodel: ${rangeToText([estimate.low, estimate.high])}`
+                  ? `Mother-in-Law Suite Investment: ${rangeToText([estimate.low, estimate.high])}`
                   : project.id === 'addition'
-                    ? `Estimated Home Addition: ${rangeToText([estimate.low, estimate.high])}`
+                    ? `Home Addition Investment: ${rangeToText([estimate.low, estimate.high])}`
                 : rangeToText([estimate.low, estimate.high])}
           </div>
           {estimate.isMinimumApplied ? (
             <div className="section-copy top-sm" style={{ color: '#5f6b7a' }}>
-              Most projects like this have a starting cost due to labor, permits, and base materials.
+              Projects like this typically start at {currency(projectMinimums[project.id] || 0)} before larger scope, upgrades, and add-ons are selected.
             </div>
           ) : null}
           <div className="section-copy">
@@ -2298,7 +2254,7 @@ export default function App() {
           <div className="section-subtitle top-sm" style={{ color: BRAND.ink }}>Save your summary and move toward a real proposal.</div>
           <p className="section-copy top-sm">Your result is intended to help set expectations and start the conversation. The next step is a consultation, site review, and detailed scope discussion.</p>
           <div className="form-stack top-xl">
-            <Button className="full text-white" style={{ backgroundColor: BRAND.ink }} onClick={downloadPdf}><Download className="icon-inline" /> Download My Estimate</Button>
+            <Button className="full text-white" style={{ backgroundColor: BRAND.ink }} onClick={downloadPdf}><Download className="icon-inline" /> Download Estimate Summary</Button>
             <Button variant="outline" className="full" onClick={openConsultationModal}>Schedule Consultation</Button>
             <Button variant="outline" className="full" onClick={() => { window.location.href = 'mailto:info@peacefulhavenhomes.com' }}>
               <Mail className="icon-inline" /> Email Us
