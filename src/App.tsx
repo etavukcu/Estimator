@@ -60,6 +60,14 @@ type EstimateSummary = {
   preparedFor: string
 }
 
+type EstimateResult = {
+  low: number
+  high: number
+  summary: Array<{ section: string; question: string; answer: string }>
+  inferredTier: TierKey
+  isMinimumApplied?: boolean
+}
+
 const BRAND = {
   ink: '#1F2A37',
   forest: '#365D87',
@@ -858,6 +866,13 @@ const additionSectionIcons: Record<string, string> = {
   'Addition Size': '📐',
 }
 
+const projectMinimums: Record<string, number> = {
+  bathroom: 15000,
+  kitchen: 30000,
+  suite: 32000,
+  addition: 52000,
+}
+
 const derivedTierProjectIds = new Set(['kitchen', 'bathroom', 'suite', 'addition'])
 
 const bathroomPricing = {
@@ -1390,6 +1405,21 @@ function getAdditionKeyDrivers(answers: Record<string, string>) {
   ]
 }
 
+function applyProjectMinimums(projectId: string, calculatedMin: number, calculatedMax: number) {
+  const projectMinimum = projectMinimums[projectId]
+  if (!projectMinimum) {
+    return { finalMin: calculatedMin, finalMax: calculatedMax, isMinimumApplied: false }
+  }
+
+  const nearMinimumThreshold = projectMinimum * 1.1
+  const shouldSnapToMinimum = calculatedMin >= projectMinimum && calculatedMin <= nearMinimumThreshold
+  const isMinimumApplied = calculatedMin < projectMinimum || shouldSnapToMinimum
+  const finalMin = isMinimumApplied ? projectMinimum : Math.max(calculatedMin, projectMinimum)
+  const finalMax = Math.max(calculatedMax, projectMinimum * 1.2)
+
+  return { finalMin, finalMax, isMinimumApplied }
+}
+
 function calculateEstimate(project: Project | undefined, tier: string, answers: Record<string, string>) {
   if (!project) return null
   if (project.id === 'kitchen') {
@@ -1417,7 +1447,8 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
       if (!option) continue
       summary.push({ section: question.sectionTitle, question: question.label, answer: option.label })
     }
-    return { low: finalLow, high: Math.max(finalHigh, finalLow + 500), summary, inferredTier: kitchenTier }
+    const { finalMin, finalMax, isMinimumApplied } = applyProjectMinimums(project.id, finalLow, Math.max(finalHigh, finalLow + 500))
+    return { low: finalMin, high: Math.max(finalMax, finalMin + 500), summary, inferredTier: kitchenTier, isMinimumApplied }
   }
   if (project.id === 'bathroom') {
     const bathroomType = answers.bathroomType || 'full_bathroom'
@@ -1459,10 +1490,8 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
       if (!option) continue
       summary.push({ section: question.sectionTitle, question: question.label, answer: getBathroomSummaryLabel(question.id, value, option.label) })
     }
-    const minimumBathroomStartPrice = 15000
-    const adjustedLow = Math.max(finalLow, minimumBathroomStartPrice)
-    const adjustedHigh = Math.max(finalHigh, adjustedLow + 500)
-    return { low: adjustedLow, high: adjustedHigh, summary, inferredTier: inferBathroomTier(answers) }
+    const { finalMin, finalMax, isMinimumApplied } = applyProjectMinimums(project.id, finalLow, finalHigh)
+    return { low: finalMin, high: Math.max(finalMax, finalMin + 500), summary, inferredTier: inferBathroomTier(answers), isMinimumApplied }
   }
   if (project.id === 'suite') {
     const size = answers.suiteSize || 'not_sure'
@@ -1502,9 +1531,8 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
       summary.push({ section: question.sectionTitle, question: question.label, answer: getSuiteSummaryLabel(question.id, value, option.label) })
     }
 
-    const adjustedLow = Math.max(finalLow, 65000)
-    const adjustedHigh = Math.max(finalHigh, adjustedLow + 1000)
-    return { low: adjustedLow, high: adjustedHigh, summary, inferredTier: inferSuiteTier(answers) }
+    const { finalMin, finalMax, isMinimumApplied } = applyProjectMinimums(project.id, finalLow, finalHigh)
+    return { low: finalMin, high: Math.max(finalMax, finalMin + 1000), summary, inferredTier: inferSuiteTier(answers), isMinimumApplied }
   }
   if (project.id === 'addition') {
     const resolvedAdditionType = getAdditionTypeForPricing(answers)
@@ -1563,10 +1591,9 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
       summary.push({ section: question.sectionTitle, question: question.label, answer: getAdditionSummaryLabel(question.id, value, option.label) })
     }
 
-    const adjustedLow = Math.max(finalLow, 45000)
-    const adjustedHigh = Math.max(finalHigh, adjustedLow + 1000)
-    const inferredTier = midpoint > 450000 ? 'best' : midpoint > 225000 ? 'better' : 'good'
-    return { low: adjustedLow, high: adjustedHigh, summary, inferredTier }
+    const inferredTier: TierKey = midpoint > 450000 ? 'best' : midpoint > 225000 ? 'better' : 'good'
+    const { finalMin, finalMax, isMinimumApplied } = applyProjectMinimums(project.id, finalLow, finalHigh)
+    return { low: finalMin, high: Math.max(finalMax, finalMin + 1000), summary, inferredTier, isMinimumApplied }
   }
   if (!tier) return null
   const [baseLow, baseHigh] = project.baseRanges[tier as TierKey] || [0, 0]
@@ -1587,7 +1614,7 @@ function calculateEstimate(project: Project | undefined, tier: string, answers: 
   return { low, high, summary, inferredTier: tier as TierKey }
 }
 
-function buildEstimateSummary(project: Project | undefined, tier: string, estimate: ReturnType<typeof calculateEstimate>, leadName: string): EstimateSummary {
+function buildEstimateSummary(project: Project | undefined, tier: string, estimate: EstimateResult | null, leadName: string): EstimateSummary {
   const inferredTier = estimate?.inferredTier || (tier as TierKey)
   return {
     projectType: project?.name || 'Not selected',
@@ -1636,6 +1663,56 @@ function runEstimatorSmokeTests() {
     siteDifficulty: 'not_sure',
   })
   console.assert(Boolean(additionEstimate && additionEstimate.low > 0 && additionEstimate.high > additionEstimate.low), 'addition estimate should return a realistic range with fallback selections')
+
+  const kitchenMinimumEstimate = calculateEstimate(getProject('kitchen'), '', {
+    size: 'under_100',
+    layout: 'keep',
+    cabinets: 'stock',
+    countertops: 'laminate',
+    appliances: 'standard',
+    flooring: 'lvp',
+    backsplash: 'none',
+    island: 'none',
+    lighting: 'basic',
+  })
+  console.assert(Boolean(kitchenMinimumEstimate && kitchenMinimumEstimate.low >= 30000), 'kitchen estimate should never drop below project floor')
+  console.assert(Boolean(kitchenMinimumEstimate && kitchenMinimumEstimate.high >= 36000), 'kitchen estimate max should maintain minimum spread above floor')
+
+  const bathroomMinimumEstimate = calculateEstimate(getProject('bathroom'), '', {
+    bathroomType: 'half_bath',
+    bathroomSize: 'under_40',
+    bathLayout: 'none',
+    showerTub: 'refresh',
+    vanity: 'basic_prefab',
+    tile: 'minimal',
+    finishLevel: 'budget',
+  })
+  console.assert(Boolean(bathroomMinimumEstimate && bathroomMinimumEstimate.low >= 15000), 'bathroom estimate should never drop below project floor')
+
+  const suiteMinimumEstimate = calculateEstimate(getProject('suite'), '', {
+    suiteSize: '300_500',
+    suiteProjectType: 'convert_existing',
+    suiteKitchen: 'none',
+    suiteBathroom: 'one_standard',
+    suiteUtilities: 'existing_accessible',
+    suiteFinish: 'standard',
+    suiteSiteComplexity: 'easy_access',
+  })
+  console.assert(Boolean(suiteMinimumEstimate && suiteMinimumEstimate.low >= 32000), 'suite estimate should never drop below project floor')
+
+  const additionMinimumEstimate = calculateEstimate(getProject('addition'), '', {
+    additionType: 'bedroom_addition',
+    additionSize: 'under_200',
+    finishLevel: 'basic_builder_grade',
+    plumbingScope: 'no_plumbing',
+    hvacScope: 'no_extension',
+    structuralScope: 'simple_slab',
+    exteriorScope: 'simple_roof_tie_in',
+    matchQuality: 'basic_match',
+    permitDesignScope: 'basic_permit_only',
+    siteDifficulty: 'easy_access',
+  })
+  console.assert(Boolean(additionMinimumEstimate && additionMinimumEstimate.low >= 52000), 'addition estimate should never drop below project floor')
 }
 
 runEstimatorSmokeTests()
@@ -2145,6 +2222,11 @@ export default function App() {
                     ? `Estimated Home Addition: ${rangeToText([estimate.low, estimate.high])}`
                 : rangeToText([estimate.low, estimate.high])}
           </div>
+          {estimate.isMinimumApplied ? (
+            <div className="section-copy top-sm" style={{ color: '#5f6b7a' }}>
+              Most projects like this have a starting cost due to labor, permits, and base materials.
+            </div>
+          ) : null}
           <div className="section-copy">
             {project.id === 'kitchen'
               ? 'Based on similar kitchen projects and your selections'
