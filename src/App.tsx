@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-react'
 import jsPDF from 'jspdf'
+import { Analytics } from '@vercel/analytics/react'
 import logo from './assets/peaceful-haven-logo.svg'
 import { insertConsultationRequest } from './lib/supabaseClient'
 
@@ -2296,6 +2297,7 @@ export default function App() {
 
   return (
     <div className="page" style={{ backgroundColor: BRAND.cream }}>
+      <Analytics />
       <div className="container">
         <div className="header-row">
           <div className="brand-wrap">

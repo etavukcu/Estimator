@@ -13,6 +13,7 @@
     "start": "npm run build && npm run dev:server"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "framer-motion": "^12.23.12",
     "jspdf": "^3.0.3",
     "lucide-react": "^0.542.0",
