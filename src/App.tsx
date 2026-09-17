@@ -1763,10 +1763,10 @@ function WelcomeLanding({
             </ul>
 
             <div className="btn-row wrap-gap">
-              <Button className="text-white" style={{ backgroundColor: BRAND.ink }} onClick={onStart}>
+              <Button className="text-white landing-cta" style={{ backgroundColor: BRAND.ink }} onClick={onStart}>
                 Start My Estimate <ArrowRight className="icon-inline" />
               </Button>
-              <a className="btn btn-outline" href={`tel:${PHONE_TEL}`}>
+              <a className="btn btn-outline landing-cta" href={`tel:${PHONE_TEL}`}>
                 <Phone className="icon-inline" /> Call {PHONE_DISPLAY}
               </a>
             </div>
@@ -1783,7 +1783,7 @@ function WelcomeLanding({
             This is a planning tool—not a firm bid. After your range, you can book a free
             consultation for an on-site scope and firm quote.
           </p>
-          <Button className="full text-white top-lg" style={{ backgroundColor: BRAND.ink }} onClick={onStart}>
+          <Button className="full text-white top-lg landing-cta" style={{ backgroundColor: BRAND.ink }} onClick={onStart}>
             Start My Estimate
           </Button>
         </aside>
@@ -2401,7 +2401,7 @@ export default function App() {
   else if (currentQuestion) stepContent = questionStep
 
   return (
-    <div className="page" style={{ backgroundColor: BRAND.cream }}>
+    <div className={`page${currentStage === 'welcome' ? ' page-welcome' : ''}`} style={{ backgroundColor: BRAND.cream }}>
       <div className="container">
         <div className="header-row">
           <div className="brand-wrap">
@@ -2417,7 +2417,7 @@ export default function App() {
               {PHONE_DISPLAY}
             </a>
             {currentStage === 'welcome' ? (
-              <Button className="text-white header-start-btn" style={{ backgroundColor: BRAND.ink }} onClick={start}>
+              <Button className="text-white header-start-btn landing-cta" style={{ backgroundColor: BRAND.ink }} onClick={start}>
                 Start My Estimate
               </Button>
             ) : null}
