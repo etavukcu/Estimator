@@ -20,6 +20,7 @@ import {
 import jsPDF from 'jspdf'
 import logo from './assets/peaceful-haven-logo.svg'
 import { insertConsultationRequest } from './lib/supabaseClient'
+import { LANDING_PHOTOS, LANDING_PHOTOS_APPROVED, type LandingPhotoKey } from './landingAssets'
 
 type TierKey = 'good' | 'better' | 'best'
 
@@ -81,10 +82,10 @@ const PHONE_TEL = '+14237776849'
 const CONTACT_EMAIL = 'info@peacefulhavenhomes.com'
 
 const LANDING_PROJECT_PREVIEWS = [
-  { id: 'kitchen', name: 'Kitchen', icon: ChefHat },
-  { id: 'bathroom', name: 'Bathroom', icon: Bath },
-  { id: 'suite', name: 'Mother-in-Law Suite', icon: Home },
-  { id: 'addition', name: 'Home Addition', icon: Building2 },
+  { id: 'kitchen', name: 'Kitchen', icon: ChefHat, photo: 'kitchen' as const },
+  { id: 'bathroom', name: 'Bathroom', icon: Bath, photo: 'bathroom' as const },
+  { id: 'suite', name: 'Mother-in-Law Suite', icon: Home, photo: 'suite' as const },
+  { id: 'addition', name: 'Home Addition', icon: Building2, photo: 'addition' as const },
 ] as const
 
 const LANDING_HOW_STEPS = [
@@ -94,7 +95,11 @@ const LANDING_HOW_STEPS = [
   { title: 'Optional PDF & consult', copy: 'Email a summary or book a free walkthrough.' },
 ] as const
 
-const LANDING_RECENT_PLACEHOLDERS = ['Kitchen', 'Bathroom', 'Living space'] as const
+const LANDING_RECENT_SLOTS = [
+  { label: 'Kitchen', photo: 'recentKitchen' as const },
+  { label: 'Bathroom', photo: 'recentBathroom' as const },
+  { label: 'Living space', photo: 'recentLiving' as const },
+] as const
 
 const TIERS: Record<TierKey, { label: string; subtitle: string; description: string; highlight: boolean }> = {
   good: {
@@ -1723,17 +1728,37 @@ function Card(props: React.HTMLAttributes<HTMLDivElement>) {
   return <div {...props} className={`card ${props.className || ''}`.trim()} />
 }
 
-function PhotoPlaceholder({
+function PhotoSlot({
+  photo,
   icon: Icon,
   compact = false,
 }: {
+  photo: LandingPhotoKey
   icon?: React.ComponentType<{ className?: string }>
   compact?: boolean
 }) {
+  const [failed, setFailed] = useState(false)
+  const asset = LANDING_PHOTOS[photo]
+  const showImage = Boolean(asset.src) && !failed
+
   return (
-    <div className={`photo-placeholder${compact ? ' photo-placeholder-compact' : ''}`} aria-hidden="true">
-      {Icon ? <Icon className="photo-placeholder-icon" /> : null}
-      <span>Photo pending approval</span>
+    <div className={`photo-slot${compact ? ' photo-slot-compact' : ''}`}>
+      {showImage ? (
+        <img
+          className="photo-slot-img"
+          src={asset.src}
+          alt={LANDING_PHOTOS_APPROVED ? asset.alt : ''}
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <div className={`photo-placeholder${compact ? ' photo-placeholder-compact' : ''}`} aria-hidden="true">
+          {Icon ? <Icon className="photo-placeholder-icon" /> : null}
+          <span>Photo pending approval</span>
+        </div>
+      )}
+      {!LANDING_PHOTOS_APPROVED ? (
+        <span className="photo-slot-badge">Photo pending approval</span>
+      ) : null}
     </div>
   )
 }
@@ -1832,10 +1857,12 @@ function WelcomeLanding({
                 className="landing-project-card"
                 onClick={() => onStartProject(item.id)}
               >
-                <PhotoPlaceholder icon={Icon} />
+                <PhotoSlot photo={item.photo} icon={Icon} />
                 <span className="landing-project-copy">
                   <strong>{item.name}</strong>
-                  <span className="landing-project-meta">Photo pending approval</span>
+                  <span className="landing-project-meta">
+                    {LANDING_PHOTOS_APPROVED ? 'Real PHH project' : 'Photo pending approval'}
+                  </span>
                 </span>
               </button>
             )
@@ -1845,13 +1872,15 @@ function WelcomeLanding({
         <section className="recent-work" aria-labelledby="recent-work-heading">
           <div className="recent-work-heading">
             <h3 id="recent-work-heading">Recent finished work</h3>
-            <span className="landing-micro">Photos withheld pending approval</span>
+            <span className="landing-micro">
+              {LANDING_PHOTOS_APPROVED ? 'Real project photos' : 'Placeholder slots — photos pending Eray’s selection'}
+            </span>
           </div>
           <div className="recent-work-grid">
-            {LANDING_RECENT_PLACEHOLDERS.map((label) => (
-              <figure key={label} className="recent-work-item">
-                <PhotoPlaceholder compact />
-                <figcaption>{label}</figcaption>
+            {LANDING_RECENT_SLOTS.map((item) => (
+              <figure key={item.label} className="recent-work-item">
+                <PhotoSlot photo={item.photo} compact />
+                <figcaption>{item.label}</figcaption>
               </figure>
             ))}
           </div>

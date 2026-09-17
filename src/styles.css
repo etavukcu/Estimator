@@ -249,6 +249,34 @@ a.btn { text-decoration: none; }
 }
 .photo-placeholder-compact { aspect-ratio: 4 / 3; font-size: 11px; }
 .photo-placeholder-icon { width: 28px; height: 28px; }
+.photo-slot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #E8F8F6;
+}
+.photo-slot-compact { aspect-ratio: 4 / 3; }
+.photo-slot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.photo-slot-badge {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border-radius: 999px;
+  background: rgba(31, 42, 55, 0.78);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  padding: 6px 8px;
+}
 .recent-work {
   padding: 18px;
   background: #fff;
