@@ -1,20 +1,33 @@
 # Landing photo slots (swap-ready)
 
-These files are **temporary placeholders**, not approved finished-work photos.
-Do not treat current images as the final kitchen / bathroom / suite / addition shots.
+These files are **temporary SVG placeholders**. Do not treat them as approved
+finished-work photos. Do not copy unapproved Drive images into this folder.
 
-When Eray picks photos, drop replacements here using the same basenames, then
-point `src` in `src/landingAssets.ts` at the new files and set
-`LANDING_PHOTOS_APPROVED` to `true`.
+## Approved so far (file not attached yet)
 
-| Slot | Placeholder now | Preferred drop-in name |
+Eray approved one subject: a **primary bathroom** (vanity + frameless glass
+shower + shiplap). The follow-up file name is:
+
+`public/assets/projects/bathroom-finished.jpg`
+
+That JPEG is **not in the repo yet**. Until it is dropped in a later message,
+the bathroom card and recent-bathroom slot keep the SVG placeholder.
+
+After `bathroom-finished.jpg` lands:
+
+1. Set `bathroom.src` (and optionally `recentBathroom.src`) in
+   `src/landingAssets.ts` to `APPROVED_BATHROOM_PHOTO`.
+2. Leave `LANDING_PHOTOS_APPROVED` false until every landing slot has an
+   approved photo, or only flip per-slot `src` for bathroom.
+
+## Slot map
+
+| Slot | Placeholder now | Drop-in when approved |
 | --- | --- | --- |
-| Kitchen card | `kitchen.svg` | `kitchen.jpg` |
-| Bathroom card | `bathroom.svg` | `bathroom.jpg` |
-| Mother-in-Law Suite card | `mil-suite.svg` | `mil-suite.jpg` |
-| Home Addition card | `home-addition.svg` | `home-addition.jpg` |
-| Recent work — kitchen | `recent-kitchen.svg` | `recent-kitchen.jpg` |
-| Recent work — bathroom | `recent-bathroom.svg` | `recent-bathroom.jpg` |
-| Recent work — living space | `recent-living-space.svg` | `recent-living-space.jpg` |
-
-PNG or WebP is fine; update the `src` extension in `landingAssets.ts`.
+| Kitchen card | `kitchen.svg` | *(not approved yet)* |
+| Bathroom card | `bathroom.svg` | `bathroom-finished.jpg` |
+| Mother-in-Law Suite card | `mil-suite.svg` | *(not approved yet)* |
+| Home Addition card | `home-addition.svg` | *(not approved yet)* |
+| Recent work — kitchen | `recent-kitchen.svg` | *(not approved yet)* |
+| Recent work — bathroom | `recent-bathroom.svg` | `bathroom-finished.jpg` |
+| Recent work — living space | `recent-living-space.svg` | *(not approved yet)* |

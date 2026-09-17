@@ -1,16 +1,23 @@
 /**
  * Landing photo slots.
  *
- * Final finished-work photos are NOT locked yet. Eray will pick replacements
- * in a follow-up. Until then these paths point at named placeholder files in
- * `public/assets/projects/` — swap by dropping a JPEG/PNG/WebP with the same
- * basename (or a new filename) and updating `src` here.
+ * Finished-work photos stay withheld until Eray approves each shot.
+ * Approved so far: primary bathroom (vanity + frameless glass shower + shiplap),
+ * to be attached later as `bathroom-finished.jpg`. That file is not in the
+ * repo yet, so every slot still uses an abstract SVG placeholder.
  *
- * Keep `LANDING_PHOTOS_APPROVED` false until he explicitly selects the shots.
+ * Do not pull unapproved Drive photos. Do not set `LANDING_PHOTOS_APPROVED`
+ * until the chosen files are actually committed.
  */
 export const LANDING_PHOTOS_APPROVED = false
 
 export const LANDING_PHOTO_DIR = '/assets/projects'
+
+/**
+ * One Eray-approved subject is queued: drop this file into
+ * `public/assets/projects/` in a later follow-up, then point `bathroom.src` at it.
+ */
+export const APPROVED_BATHROOM_PHOTO = `${LANDING_PHOTO_DIR}/bathroom-finished.jpg`
 
 export const LANDING_PHOTOS = {
   kitchen: {
@@ -20,8 +27,8 @@ export const LANDING_PHOTOS = {
   },
   bathroom: {
     src: `${LANDING_PHOTO_DIR}/bathroom.svg`,
-    alt: 'Bathroom remodel example',
-    swapAs: `${LANDING_PHOTO_DIR}/bathroom.jpg`,
+    alt: 'Primary bathroom with vanity, frameless glass shower, and shiplap',
+    swapAs: APPROVED_BATHROOM_PHOTO,
   },
   suite: {
     src: `${LANDING_PHOTO_DIR}/mil-suite.svg`,
@@ -41,7 +48,7 @@ export const LANDING_PHOTOS = {
   recentBathroom: {
     src: `${LANDING_PHOTO_DIR}/recent-bathroom.svg`,
     alt: 'Recent bathroom work',
-    swapAs: `${LANDING_PHOTO_DIR}/recent-bathroom.jpg`,
+    swapAs: APPROVED_BATHROOM_PHOTO,
   },
   recentLiving: {
     src: `${LANDING_PHOTO_DIR}/recent-living-space.svg`,
