@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 import jsPDF from 'jspdf'
 import logo from './assets/peaceful-haven-logo.svg'
-import { insertConsultationRequest } from './lib/supabaseClient'
+import { insertConsultationRequest, notifyLead } from './lib/supabaseClient'
 
 type TierKey = 'good' | 'better' | 'best'
 
@@ -91,7 +91,7 @@ const LANDING_HOW_STEPS = [
   { title: 'Choose project', copy: 'Kitchen, bathroom, MIL suite, or home addition.' },
   { title: 'Answer questions', copy: 'Size, layout, finishes, and a few site details.' },
   { title: 'See your range', copy: 'A Chattanooga-area planning range based on your picks.' },
-  { title: 'Optional PDF & consult', copy: 'Email a summary or book a free walkthrough.' },
+  { title: 'Optional PDF & consult', copy: 'Download a PDF (we notify our team) or book a free walkthrough.' },
 ] as const
 
 const TIERS: Record<TierKey, { label: string; subtitle: string; description: string; highlight: boolean }> = {
@@ -1959,6 +1959,7 @@ export default function App() {
   const [consultationError, setConsultationError] = useState('')
   const [consultationSuccess, setConsultationSuccess] = useState('')
   const [consultationSubmitting, setConsultationSubmitting] = useState(false)
+  const [leadPdfSubmitting, setLeadPdfSubmitting] = useState(false)
 
   const project = useMemo(() => getProject(projectId), [projectId])
   const requiresTierSelection = project ? !['kitchen', 'bathroom', 'suite', 'addition'].includes(project.id) : true
@@ -2028,6 +2029,7 @@ export default function App() {
     setConsultationError('')
     setConsultationSuccess('')
     setConsultationSubmitting(false)
+    setLeadPdfSubmitting(false)
     setConsultationForm({
       fullName: '',
       phone: '',
@@ -2038,14 +2040,32 @@ export default function App() {
     })
   }
 
-  function handleLeadPdfSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleLeadPdfSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!canSubmitLeadPdf) return
+    if (!canSubmitLeadPdf || leadPdfSubmitting) return
+
+    setLeadPdfSubmitting(true)
+    try {
+      await notifyLead({
+        source: 'pdf_request',
+        full_name: lead.fullName.trim(),
+        email: lead.email.trim(),
+        phone: lead.phone.trim() || null,
+        notes: lead.notes.trim() || null,
+        estimate_summary: estimateSummary,
+        created_at: new Date().toISOString(),
+      })
+    } catch (error) {
+      console.error('Unable to notify Peaceful Haven Homes about this PDF request.', error)
+    }
+
     try {
       downloadPdf()
     } catch (error) {
       console.error('Unable to generate the planning PDF.', error)
     }
+
+    setLeadPdfSubmitting(false)
     continueToResults()
   }
 
@@ -2111,6 +2131,7 @@ export default function App() {
 
     setConsultationSubmitting(true)
     const payload = {
+      source: 'consultation',
       full_name: fullName,
       phone,
       email,
@@ -2371,7 +2392,7 @@ export default function App() {
         <div className="card-pad">
           <h2 className="gate-form-title" id="gate-form-heading" style={{ color: BRAND.ink }}>Get your PDF summary</h2>
           <p className="section-copy gate-form-intro">
-            We’ll email a clean summary of your range and selections. No obligation.
+            Download your PDF — we’ll also notify our team with your range and contact info. No obligation.
           </p>
           <form className="form-stack top-lg" onSubmit={handleLeadPdfSubmit}>
             <Field
@@ -2420,9 +2441,9 @@ export default function App() {
                 type="submit"
                 className="full text-white gate-cta"
                 style={{ backgroundColor: BRAND.ink }}
-                disabled={!estimate}
+                disabled={!estimate || leadPdfSubmitting}
               >
-                Email me the PDF
+                {leadPdfSubmitting ? 'Notifying our team…' : 'Download your PDF'}
               </Button>
               <button type="button" className="gate-skip" onClick={skipLeadPdf}>
                 Skip PDF — book a consultation instead
@@ -2430,7 +2451,7 @@ export default function App() {
             </div>
 
             <p className="gate-honest-copy">
-              Leaving contact lets us send the PDF and follow up if you want help refining the range.
+              The PDF downloads on this device. Submitting also notifies our team so we can follow up if you want help refining the range.
               You can still book a consult without downloading.
             </p>
           </form>

@@ -43,6 +43,8 @@ async function postToServerApi(payload: Record<string, unknown>) {
 }
 
 async function postDirectToSupabase(payload: Record<string, unknown>) {
+  const row = { ...payload }
+  delete row.source
   return fetch(`${directSupabaseUrl}/rest/v1/consultation_requests`, {
     method: 'POST',
     headers: {
@@ -51,8 +53,14 @@ async function postDirectToSupabase(payload: Record<string, unknown>) {
       'Content-Type': 'application/json',
       Prefer: 'return=minimal',
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(row),
   })
+}
+
+export async function notifyLead(payload: Record<string, unknown>) {
+  const response = await postToServerApi(payload)
+  if (response.ok) return
+  throw new Error(await parseErrorMessage(response))
 }
 
 export async function insertConsultationRequest(payload: Record<string, unknown>) {
