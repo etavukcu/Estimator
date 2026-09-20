@@ -115,6 +115,33 @@ const TIERS: Record<TierKey, { label: string; subtitle: string; description: str
   },
 }
 
+const TIER_GATE_COPY: Record<TierKey, { short: string; detail: string }> = {
+  good: {
+    short: 'Value-focused finishes based on your picks',
+    detail: 'Builder-grade to value cabinets, countertops, and fixtures. You can refine finish level on a walkthrough.',
+  },
+  better: {
+    short: 'Mid-range finishes based on your picks',
+    detail: 'Mid-range cabinets, countertops, and fixtures—above builder-grade, below luxury custom. You can refine finish level on a walkthrough.',
+  },
+  best: {
+    short: 'Premium finishes based on your picks',
+    detail: 'Premium cabinets, countertops, and fixtures with elevated detailing. You can refine finish level on a walkthrough.',
+  },
+}
+
+const GATE_INCLUDED = [
+  'Labor & installation',
+  'Typical finishes & allowances',
+  'Standard fixtures at your finish level',
+]
+
+const GATE_EXCLUDED = [
+  'Permits & design fees',
+  'Hidden structural surprises',
+  'Sales tax & site unknowns',
+]
+
 const PROJECTS: Project[] = [
   {
     id: 'kitchen',
@@ -790,6 +817,10 @@ function currency(value: number) {
 
 function rangeToText([low, high]: [number, number]) {
   return `${currency(low)} - ${currency(high)}`
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 }
 
 function getProject(projectId: string) {
@@ -1962,18 +1993,25 @@ export default function App() {
   const stages = ['welcome', 'project', ...(requiresTierSelection ? ['tier'] : []), ...activeQuestions.map((q) => q.id), 'lead', 'results']
   const currentStage = stages[step] || 'welcome'
   const currentQuestion = activeQuestions.find((q) => q.id === currentStage)
-  const progress = Math.round((step / Math.max(stages.length - 1, 1)) * 100)
+  const questionStepTotal = 1 + (requiresTierSelection ? 1 : 0) + activeQuestions.length
+  const leadQuestionsComplete = currentStage === 'lead'
+  const progress = leadQuestionsComplete ? 100 : Math.round((step / Math.max(stages.length - 1, 1)) * 100)
+  const progressLabel = leadQuestionsComplete
+    ? `Step ${questionStepTotal} of ${questionStepTotal} · Questions complete`
+    : 'Progress'
+  const canSubmitLeadPdf = Boolean(lead.fullName.trim() && isValidEmail(lead.email.trim()))
 
   function canContinue() {
     if (currentStage === 'welcome') return true
     if (currentStage === 'project') return Boolean(projectId)
     if (currentStage === 'tier') return requiresTierSelection ? Boolean(tier) : true
     if (currentQuestion) return Boolean(answers[currentQuestion.id])
-    if (currentStage === 'lead') return Boolean(lead.fullName.trim() && lead.email.trim() && lead.phone.trim())
+    if (currentStage === 'lead') return canSubmitLeadPdf
     return true
   }
 
   function next() { if (canContinue()) setStep((s) => Math.min(s + 1, stages.length - 1)) }
+  function continueToResults() { setStep((s) => Math.min(s + 1, stages.length - 1)) }
   function back() { setStep((s) => Math.max(s - 1, 0)) }
   function start() { setStep(1) }
   function startFromProject(id: string) {
@@ -1998,6 +2036,21 @@ export default function App() {
       projectAddress: '',
       notes: '',
     })
+  }
+
+  function handleLeadPdfSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!canSubmitLeadPdf) return
+    try {
+      downloadPdf()
+    } catch (error) {
+      console.error('Unable to generate the planning PDF.', error)
+    }
+    continueToResults()
+  }
+
+  function skipLeadPdf() {
+    continueToResults()
   }
 
   function resetAnswersForTier(nextTier: string) {
@@ -2256,32 +2309,131 @@ export default function App() {
     </Card>
   ) : null
 
+  const activeTierKey = (activeTier || 'better') as TierKey
+  const activeTierCopy = TIER_GATE_COPY[activeTierKey]
   const leadStep = (
-    <div className="layout-two">
-      <Card>
+    <div className="gate-grid">
+      <Card className="gate-range" aria-labelledby="gate-range-heading">
         <div className="card-pad">
-          <div className="section-title" style={{ color: BRAND.ink }}>Where should we label your estimate?</div>
-          <div className="section-copy">We include this info in your PDF estimate summary.</div>
-          <div className="form-stack top-lg">
-            <Field label="Full name" icon={<User className="field-icon" />} value={lead.fullName} onChange={(v) => setLead((p) => ({ ...p, fullName: v }))} placeholder="Your full name" />
-            <Field label="Email" icon={<Mail className="field-icon" />} value={lead.email} onChange={(v) => setLead((p) => ({ ...p, email: v }))} placeholder="you@example.com" type="email" />
-            <Field label="Phone" icon={<Phone className="field-icon" />} value={lead.phone} onChange={(v) => setLead((p) => ({ ...p, phone: v }))} placeholder="(555) 555-5555" />
-            <div>
-              <label className="label">Anything else you want us to know? (optional)</label>
-              <textarea className="textarea" value={lead.notes} onChange={(e) => setLead((p) => ({ ...p, notes: e.target.value }))} placeholder="Tell us about timing, goals, or special requests." />
+          <div className="gate-range-label" id="gate-range-heading">Your planning range so far</div>
+          <p className="gate-range-amount" style={{ color: BRAND.ink }}>
+            {estimate ? rangeToText([estimate.low, estimate.high]) : '—'}
+          </p>
+          <p className="gate-range-project">
+            for <strong>{project?.name || 'your project'}</strong>
+          </p>
+          {activeTier ? (
+            <div className="gate-finish-badge" style={{ backgroundColor: BRAND.sand, color: BRAND.ink }}>
+              Finish level: {TIERS[activeTierKey].label}
+              <span className="gate-finish-explain"> · {activeTierCopy.short}</span>
             </div>
+          ) : null}
+
+          <div className="gate-incl-excl" aria-label="Inclusions and exclusions">
+            <div className="gate-incl-col">
+              <h3>Typically included</h3>
+              <ul>
+                {GATE_INCLUDED.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="gate-excl-col">
+              <h3>Not included</h3>
+              <ul>
+                {GATE_EXCLUDED.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="gate-accordion">
+            <details>
+              <summary>Why is this a range?</summary>
+              <div className="gate-acc-body">
+                Finish brands, layout quirks, and site conditions move costs. This range is a
+                planning tool for Chattanooga-area projects—not a firm bid. A free consultation
+                turns it into a scoped quote.
+              </div>
+            </details>
+            {activeTier ? (
+              <details>
+                <summary>What “{TIERS[activeTierKey].label}” means</summary>
+                <div className="gate-acc-body">{activeTierCopy.detail}</div>
+              </details>
+            ) : null}
           </div>
         </div>
       </Card>
-      <Card className="text-white" style={{ background: `linear-gradient(135deg, ${BRAND.ink}, ${BRAND.forest})` }}>
+
+      <Card className="gate-form-card" aria-labelledby="gate-form-heading">
         <div className="card-pad">
-          <div className="kicker light">Estimate preview</div>
-          <div className="stack-md top-lg">
-            <InfoBlock label="Project" value={project?.name || '-'} />
-            <InfoBlock label={project?.id && derivedTierProjectIds.has(project.id) ? 'Inferred tier' : 'Selected tier'} value={activeTier ? TIERS[activeTier as TierKey].label : '-'} pill />
-            <InfoBlock label="Estimated investment so far" value={estimate ? rangeToText([estimate.low, estimate.high]) : '-'} range />
-          </div>
-          <div className="info-box top-xl">When you continue, we'll generate your planning range and downloadable PDF summary.</div>
+          <h2 className="gate-form-title" id="gate-form-heading" style={{ color: BRAND.ink }}>Get your PDF summary</h2>
+          <p className="section-copy gate-form-intro">
+            We’ll email a clean summary of your range and selections. No obligation.
+          </p>
+          <form className="form-stack top-lg" onSubmit={handleLeadPdfSubmit}>
+            <Field
+              id="gate-full-name"
+              label={<>Full name <span className="req">required</span></>}
+              icon={<User className="field-icon" />}
+              value={lead.fullName}
+              onChange={(v) => setLead((p) => ({ ...p, fullName: v }))}
+              placeholder="Alex Rivera"
+              autoComplete="name"
+              required
+            />
+            <Field
+              id="gate-email"
+              label={<>Email <span className="req">required</span></>}
+              icon={<Mail className="field-icon" />}
+              value={lead.email}
+              onChange={(v) => setLead((p) => ({ ...p, email: v }))}
+              placeholder="you@example.com"
+              type="email"
+              autoComplete="email"
+              required
+            />
+            <Field
+              id="gate-phone"
+              label={<>Phone <span className="req req-optional">optional</span></>}
+              icon={<Phone className="field-icon" />}
+              value={lead.phone}
+              onChange={(v) => setLead((p) => ({ ...p, phone: v }))}
+              placeholder="(423) 555-0123"
+              type="tel"
+              autoComplete="tel"
+              helper="Optional — only if you’d like us to call about a walkthrough."
+            />
+
+            <label className="gate-consent">
+              <input type="checkbox" defaultChecked />
+              <span>
+                No obligation. We won’t spam you.{' '}
+                <a href={`mailto:${CONTACT_EMAIL}?subject=Privacy%20question`}>Privacy</a>.
+              </span>
+            </label>
+
+            <div className="gate-form-actions">
+              <Button
+                type="submit"
+                className="full text-white gate-cta"
+                style={{ backgroundColor: BRAND.ink }}
+                disabled={!estimate}
+              >
+                Email me the PDF
+              </Button>
+              <button type="button" className="gate-skip" onClick={skipLeadPdf}>
+                Skip PDF — book a consultation instead
+              </button>
+            </div>
+
+            <p className="gate-honest-copy">
+              Leaving contact lets us send the PDF and follow up if you want help refining the range.
+              You can still book a consult without downloading.
+            </p>
+          </form>
         </div>
       </Card>
     </div>
@@ -2401,7 +2553,7 @@ export default function App() {
   else if (currentQuestion) stepContent = questionStep
 
   return (
-    <div className={`page${currentStage === 'welcome' ? ' page-welcome' : ''}`} style={{ backgroundColor: BRAND.cream }}>
+    <div className={`page${currentStage === 'welcome' ? ' page-welcome' : ''}${currentStage === 'lead' ? ' page-gate' : ''}`} style={{ backgroundColor: BRAND.cream }}>
       <div className="container">
         <div className="header-row">
           <div className="brand-wrap">
@@ -2428,10 +2580,22 @@ export default function App() {
           <Card className="progress-card">
             <div className="card-pad-sm">
               <div className="progress-row">
-                <span>Progress</span>
+                <span>{progressLabel}</span>
                 <span>{progress}%</span>
               </div>
-              <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%`, backgroundColor: BRAND.ink }} /></div>
+              <div
+                className="progress-track"
+                role="progressbar"
+                aria-valuenow={progress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={progressLabel}
+              >
+                <div
+                  className="progress-fill"
+                  style={{ width: `${progress}%`, backgroundColor: leadQuestionsComplete ? BRAND.sage : BRAND.ink }}
+                />
+              </div>
             </div>
           </Card>
         ) : null}
@@ -2445,16 +2609,7 @@ export default function App() {
         {currentStage !== 'welcome' && currentStage !== 'results' ? (
           <div className="nav-row">
             <Button variant="outline" onClick={back} disabled={step === 0} style={{ borderColor: BRAND.sage, color: BRAND.ink }}><ArrowLeft className="icon-inline" /> Back</Button>
-            {currentStage === 'lead' ? (
-              <Button
-                className="text-white"
-                style={{ backgroundColor: BRAND.ink }}
-                onClick={next}
-                disabled={!canContinue()}
-              >
-                Download My Estimate <ArrowRight className="icon-inline" />
-              </Button>
-            ) : (
+            {currentStage === 'lead' ? null : (
               <Button className="text-white" style={{ backgroundColor: BRAND.ink }} onClick={next} disabled={!canContinue()}>
                 Continue <ArrowRight className="icon-inline" />
               </Button>
@@ -2486,14 +2641,46 @@ export default function App() {
   )
 }
 
-function Field({ label, icon, value, onChange, placeholder, type = 'text' }: { label: string; icon: React.ReactNode; value: string; onChange: (v: string) => void; placeholder: string; type?: string }) {
+function Field({
+  label,
+  icon,
+  value,
+  onChange,
+  placeholder,
+  type = 'text',
+  helper,
+  id,
+  autoComplete,
+  required,
+}: {
+  label: React.ReactNode
+  icon: React.ReactNode
+  value: string
+  onChange: (v: string) => void
+  placeholder: string
+  type?: string
+  helper?: string
+  id?: string
+  autoComplete?: string
+  required?: boolean
+}) {
   return (
     <div>
-      <label className="label">{label}</label>
+      <label className="label" htmlFor={id}>{label}</label>
       <div className="field-wrap">
         {icon}
-        <input className="input" type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+        <input
+          id={id}
+          className="input"
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          required={required}
+        />
       </div>
+      {helper ? <p className="form-helper">{helper}</p> : null}
     </div>
   )
 }
