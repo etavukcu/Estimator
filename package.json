@@ -10,7 +10,9 @@
     "postinstall": "node -e \"const fs=require('fs');const p='node_modules/@esbuild/linux-x64/bin/esbuild';if(fs.existsSync(p)){fs.chmodSync(p,0o755);console.log('Ensured executable permission for '+p);}\"",
     "dev:client": "vite",
     "dev:server": "node server/index.mjs",
-    "start": "npm run build && npm run dev:server"
+    "start": "npm run build && npm run dev:server",
+    "test": "node --test lib/leadNotification.test.mjs",
+    "test:lead-email": "node --test lib/leadNotification.test.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.23.12",
