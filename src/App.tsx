@@ -12,10 +12,7 @@ import {
   Phone,
   User,
   CheckCircle2,
-  CalendarClock,
-  MapPin,
   Loader2,
-  X,
 } from 'lucide-react'
 import jsPDF from 'jspdf'
 import logo from './assets/peaceful-haven-logo.svg'
@@ -141,6 +138,38 @@ const GATE_EXCLUDED = [
   'Hidden structural surprises',
   'Sales tax & site unknowns',
 ]
+
+const RESULTS_INCLUDED = [
+  'Labor & project management',
+  'Typical finishes & allowances at your level',
+  'Standard fixture install',
+]
+
+const RESULTS_EXCLUDED = [
+  'Permits & design fees',
+  'Hidden structural / electrical surprises',
+  'Sales tax & site unknowns',
+]
+
+const RESULTS_TIMING_OPTIONS = ['ASAP', '1–3 months', 'Exploring'] as const
+
+const COMPANY_ADDRESS = '5519 TN-153 #4, Hixson, TN 37343'
+
+// Theme paraphrases only — not verbatim reviews, no reviewer names, no star ratings.
+const RESULTS_TRUST_THEMES = [
+  {
+    quote: 'Kept us updated the whole way—no guessing what was happening next.',
+    attr: 'Google review · Communication',
+  },
+  {
+    quote: 'Craftsmanship matched what we hoped for; finishes look solid and thoughtful.',
+    attr: 'Google review · Quality',
+  },
+  {
+    quote: 'Stayed on the schedule they set and wrapped when they said they would.',
+    attr: 'Google review · On time',
+  },
+] as const
 
 const PROJECTS: Project[] = [
   {
@@ -819,6 +848,19 @@ function rangeToText([low, high]: [number, number]) {
   return `${currency(low)} - ${currency(high)}`
 }
 
+function rangeToDisplayText([low, high]: [number, number]) {
+  return `${currency(low)} – ${currency(high)}`
+}
+
+function getTypicalSpend(estimate: EstimateResult | null) {
+  if (!estimate) return null
+  if (!Number.isFinite(estimate.low) || !Number.isFinite(estimate.high)) return null
+  if (estimate.high <= 0 || estimate.high < estimate.low) return null
+  const mid = roundPresentation((estimate.low + estimate.high) / 2)
+  if (!Number.isFinite(mid) || mid <= 0) return null
+  return mid
+}
+
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 }
@@ -1470,6 +1512,115 @@ function getAdditionKeyDrivers(answers: Record<string, string>) {
   ]
 }
 
+function getKitchenKeyDrivers(answers: Record<string, string>, inferredTier: TierKey) {
+  const sizeMap: Record<string, string> = {
+    under_100: 'Compact kitchen footprint',
+    '100_150': 'Compact-to-mid kitchen footprint',
+    '150_250': 'Mid-size kitchen footprint',
+    '250_400': 'Larger kitchen footprint',
+    '400_plus': 'Large kitchen footprint',
+    not_sure: 'Typical mid-size kitchen footprint assumed',
+  }
+  const islandMap: Record<string, string> = {
+    none: 'no island',
+    keep: 'existing island',
+    add: 'new island',
+    upgrade: 'upgraded island',
+    not_sure: 'island allowance included',
+  }
+  const applianceMap: Record<string, string> = {
+    keep: 'existing appliances kept',
+    standard: 'standard appliance count',
+    premium: 'premium appliance package',
+    luxury: 'luxury appliance package',
+    not_sure: 'typical appliance allowance',
+  }
+  const finishMap: Record<TierKey, string> = {
+    good: '“Good” finish package (value-focused cabinets, counters, fixtures)',
+    better: '“Better” finish package (mid-range cabinets, counters, fixtures)',
+    best: '“Best” finish package (premium cabinets, counters, fixtures)',
+  }
+  const layoutScopeMap: Record<string, string> = {
+    keep:
+      answers.cabinets && answers.cabinets !== 'refinish'
+        ? 'Finish replacement with the existing layout — more material work than a cosmetic refresh, without a full redesign'
+        : 'Cosmetic refresh rather than a full gut — less demolition and reconnection work',
+    minor: 'Modest layout changes — some appliance or plumbing relocation',
+    full: 'Full redesign vs. cosmetic refresh — more demolition and reconnection work',
+  }
+  const layoutAssumptionMap: Record<string, string> = {
+    keep: 'No major layout relocation of plumbing or load-bearing walls assumed',
+    minor: 'Limited appliance/plumbing relocation assumed — no load-bearing wall work',
+    full: 'Full redesign assumed; hidden structural work is not included in this range',
+  }
+
+  return [
+    `${sizeMap[answers.size || 'not_sure'] || sizeMap.not_sure} with ${islandMap[answers.island || 'not_sure'] || islandMap.not_sure} and ${applianceMap[answers.appliances || 'not_sure'] || applianceMap.not_sure}`,
+    finishMap[inferredTier],
+    layoutScopeMap[answers.layout || 'keep'] || layoutScopeMap.keep,
+    'Typical Chattanooga-area labor & material allowances',
+    layoutAssumptionMap[answers.layout || 'keep'] || layoutAssumptionMap.keep,
+  ]
+}
+
+function getBathroomKeyDrivers(answers: Record<string, string>, inferredTier: TierKey) {
+  const typeMap: Record<string, string> = {
+    half_bath: 'Half bath / powder room scope',
+    full_bathroom: 'Full bathroom remodel',
+    primary_bathroom: 'Primary bathroom remodel',
+  }
+  const sizeMap: Record<string, string> = {
+    under_40: 'compact footprint (under 40 sq ft)',
+    '40_80': 'typical 40–80 sq ft footprint',
+    '80_120': 'larger 80–120 sq ft footprint',
+    '120_plus': 'spacious 120+ sq ft footprint',
+    not_sure_estimate: 'typical bathroom footprint assumed',
+  }
+  const finishMap: Record<TierKey, string> = {
+    good: '“Good” finish package (value-focused fixtures and surfaces)',
+    better: '“Better” finish package (mid-range fixtures, vanity, and tile)',
+    best: '“Best” finish package (premium fixtures, vanity, and tile)',
+  }
+  const showerMap: Record<string, string> = {
+    refresh: 'Cosmetic refresh of the existing shower or tub — less demolition',
+    standard_replacement: 'Standard tub or shower replacement',
+    walk_in_tiled: 'Walk-in tiled shower — more waterproofing and tile labor',
+    luxury_custom: 'Luxury custom shower — a major finish and labor driver',
+    not_sure_estimate: 'Typical shower/tub replacement allowance used',
+    other_custom_setup: 'Custom shower/tub setup allowance included',
+  }
+  const layoutMap: Record<string, string> = {
+    none: 'No major plumbing relocation assumed',
+    minor: 'Minor plumbing or layout changes',
+    major: 'Major plumbing or layout changes',
+    not_sure_estimate: 'Typical plumbing-change allowance used',
+  }
+
+  const typeLabel = typeMap[answers.bathroomType] || 'Bathroom remodel'
+  const sizeLabel = sizeMap[answers.bathroomSize] || sizeMap.not_sure_estimate
+
+  return [
+    `${typeLabel} with ${sizeLabel}`,
+    finishMap[inferredTier],
+    showerMap[answers.showerTub] || showerMap.not_sure_estimate,
+    layoutMap[answers.bathLayout] || layoutMap.not_sure_estimate,
+    'Typical Chattanooga-area labor & material allowances',
+  ]
+}
+
+function getRangeDrivers(project: Project | undefined, answers: Record<string, string>, inferredTier: TierKey) {
+  if (!project) return [] as string[]
+  if (project.id === 'kitchen') return getKitchenKeyDrivers(answers, inferredTier).filter(Boolean).slice(0, 5)
+  if (project.id === 'bathroom') return getBathroomKeyDrivers(answers, inferredTier).filter(Boolean).slice(0, 5)
+  if (project.id === 'suite') {
+    return [...getSuiteKeyDrivers(answers), 'Typical Chattanooga-area labor & material allowances'].filter(Boolean).slice(0, 5)
+  }
+  if (project.id === 'addition') {
+    return [...getAdditionKeyDrivers(answers), 'Typical Chattanooga-area labor & material allowances'].filter(Boolean).slice(0, 5)
+  }
+  return ['Typical Chattanooga-area labor & material allowances']
+}
+
 function applyProjectMinimums(projectId: string, calculatedMin: number, calculatedMax: number) {
   const projectMinimum = projectMinimums[projectId]
   if (!projectMinimum) {
@@ -1733,6 +1884,29 @@ function runEstimatorSmokeTests() {
     siteDifficulty: 'easy_access',
   })
   console.assert(Boolean(additionMinimumEstimate && additionMinimumEstimate.low >= 52000), 'addition estimate should never drop below project floor')
+
+  const kitchenDrivers = getKitchenKeyDrivers({
+    size: '150_250',
+    layout: 'keep',
+    cabinets: 'semi_custom',
+    appliances: 'standard',
+    island: 'add',
+  }, 'better')
+  console.assert(kitchenDrivers.length >= 3 && kitchenDrivers.length <= 5, 'kitchen range drivers should be 3–5 bullets')
+  console.assert(kitchenDrivers.some((item) => item.includes('Mid-size')), 'kitchen drivers should mention selected size')
+  console.assert(kitchenDrivers.some((item) => item.includes('Better')), 'kitchen drivers should mention inferred finish level')
+
+  const bathroomDrivers = getBathroomKeyDrivers({
+    bathroomType: 'full_bathroom',
+    bathroomSize: '40_80',
+    bathLayout: 'none',
+    showerTub: 'refresh',
+  }, 'good')
+  console.assert(bathroomDrivers.length >= 3 && bathroomDrivers.length <= 5, 'bathroom range drivers should be 3–5 bullets')
+
+  const typicalSpend = getTypicalSpend({ low: 63500, high: 106000, summary: [], inferredTier: 'better' })
+  console.assert(Boolean(typicalSpend && typicalSpend >= 63500 && typicalSpend <= 106000), 'typical spend should be the rounded midpoint of the live range')
+  console.assert(rangeToDisplayText([63500, 106000]) === '$63,500 – $106,000', 'results range should use an en dash')
 }
 
 runEstimatorSmokeTests()
@@ -1928,26 +2102,12 @@ function OptionCards({
   )
 }
 
-function SummaryPill({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
-  return (
-    <div className="summary-pill" style={{ backgroundColor: highlight ? BRAND.sand : '#f5f5f4' }}>
-      <div className="summary-label" style={{ color: highlight ? BRAND.forest : '#78716c' }}>{label}</div>
-      {highlight ? (
-        <div className="summary-value-highlight" style={{ backgroundColor: BRAND.sage, color: BRAND.ink }}>{value}</div>
-      ) : (
-        <div className="summary-value">{value}</div>
-      )}
-    </div>
-  )
-}
-
 export default function App() {
   const [step, setStep] = useState(0)
   const [projectId, setProjectId] = useState('')
   const [tier, setTier] = useState('')
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [lead, setLead] = useState({ fullName: '', email: '', phone: '', notes: '' })
-  const [consultationOpen, setConsultationOpen] = useState(false)
   const [consultationForm, setConsultationForm] = useState({
     fullName: '',
     phone: '',
@@ -1983,8 +2143,11 @@ export default function App() {
   const bathroomHasFallbackSelections = useMemo(() => hasBathroomFallbackSelections(answers), [answers])
   const suiteHasFallbackSelections = useMemo(() => hasSuiteFallbackSelections(answers), [answers])
   const additionHasFallbackSelections = useMemo(() => hasAdditionFallbackSelections(answers), [answers])
-  const additionKeyDrivers = useMemo(() => getAdditionKeyDrivers(answers), [answers])
-  const suiteKeyDrivers = useMemo(() => getSuiteKeyDrivers(answers), [answers])
+  const rangeDrivers = useMemo(
+    () => getRangeDrivers(project, answers, (activeTier || 'better') as TierKey),
+    [project, answers, activeTier]
+  )
+  const typicalSpend = useMemo(() => getTypicalSpend(estimate), [estimate])
   const bathroomConfidenceMessage = 'This estimate is based on your bathroom type, layout complexity, fixture selections, and finish level. Most projects with similar selections fall within this range, excluding hidden conditions or structural repairs.'
   const bathroomFallbackConfidenceMessage = 'This estimate is based on your bathroom type, layout complexity, fixture selections, and finish level. Where selections were marked as unsure or custom, we used reasonable planning assumptions to keep the estimate realistic. Final pricing may vary once exact materials and scope are confirmed.'
   const suiteConfidenceMessage = 'Based on similar Mother-in-Law suite and ADU remodels with comparable size, project type, systems scope, and finish expectations.'
@@ -2012,7 +2175,22 @@ export default function App() {
   }
 
   function next() { if (canContinue()) setStep((s) => Math.min(s + 1, stages.length - 1)) }
-  function continueToResults() { setStep((s) => Math.min(s + 1, stages.length - 1)) }
+  function prefillConsultationFromLead() {
+    setConsultationError('')
+    setConsultationSuccess('')
+    setConsultationForm((prev) => ({
+      ...prev,
+      fullName: prev.fullName || lead.fullName,
+      phone: prev.phone || lead.phone,
+      email: prev.email || lead.email,
+      notes: prev.notes || lead.notes,
+    }))
+  }
+
+  function continueToResults() {
+    prefillConsultationFromLead()
+    setStep((s) => Math.min(s + 1, stages.length - 1))
+  }
   function back() { setStep((s) => Math.max(s - 1, 0)) }
   function start() { setStep(1) }
   function startFromProject(id: string) {
@@ -2025,7 +2203,6 @@ export default function App() {
     setTier('')
     setAnswers({})
     setLead({ fullName: '', email: '', phone: '', notes: '' })
-    setConsultationOpen(false)
     setConsultationError('')
     setConsultationSuccess('')
     setConsultationSubmitting(false)
@@ -2094,26 +2271,6 @@ export default function App() {
       const nextAnswers = { ...prev, [questionId]: value }
       return sanitizeAnswers(project, tier, nextAnswers)
     })
-  }
-
-  function openConsultationModal() {
-    setConsultationOpen(true)
-    setConsultationError('')
-    setConsultationSuccess('')
-    setConsultationForm((prev) => ({
-      ...prev,
-      fullName: prev.fullName || lead.fullName,
-      phone: prev.phone || lead.phone,
-      email: prev.email || lead.email,
-      notes: prev.notes || lead.notes,
-    }))
-  }
-
-  function closeConsultationModal() {
-    setConsultationOpen(false)
-    setConsultationError('')
-    setConsultationSuccess('')
-    setConsultationSubmitting(false)
   }
 
   async function submitConsultationRequest(event: React.FormEvent<HTMLFormElement>) {
@@ -2461,108 +2618,223 @@ export default function App() {
   )
 
   const resultsStep = estimate && project && activeTier ? (
-    <div className="layout-two-results">
-      <Card>
-        <div className="card-pad">
-          <div className="kicker" style={{ color: BRAND.forest }}>Your Estimated Range</div>
-          <div className="range-title" style={{ backgroundColor: BRAND.ink, color: 'white' }}>
-            {project.id === 'kitchen'
-              ? `Kitchen Remodel Investment: ${rangeToText([estimate.low, estimate.high])}`
-              : project.id === 'bathroom'
-                ? `Bathroom Remodel Investment: ${rangeToText([estimate.low, estimate.high])}`
-                : project.id === 'suite'
-                  ? `Mother-in-Law Suite Investment: ${rangeToText([estimate.low, estimate.high])}`
-                  : project.id === 'addition'
-                    ? `Home Addition Investment: ${rangeToText([estimate.low, estimate.high])}`
-                : rangeToText([estimate.low, estimate.high])}
-          </div>
-          {estimate.isMinimumApplied ? (
-            <div className="section-copy top-sm" style={{ color: '#5f6b7a' }}>
-              Projects like this typically start at {currency(projectMinimums[project.id] || 0)} before larger scope, upgrades, and add-ons are selected.
+    <div className="results-page">
+      <section className="results-hero card" aria-labelledby="results-heading">
+        <span className="results-kicker">
+          <span className="kicker-dot" aria-hidden="true" />
+          {project.name}
+        </span>
+        <h2 id="results-heading" className="results-title">Your planning range</h2>
+        <p className="results-range-amount">{rangeToDisplayText([estimate.low, estimate.high])}</p>
+        {typicalSpend ? (
+          <p className="results-most-spend">
+            Most homeowners spend around <strong>{currency(typicalSpend)}</strong>
+            {' '}for a similar “{TIERS[activeTier as TierKey].label}” finish level.
+          </p>
+        ) : null}
+        <p className="results-disclaimer">
+          Honest planning range for the Chattanooga / Hixson area · Not a firm bid.
+          A free consultation turns this into a scoped quote.
+        </p>
+        <a className="btn text-white results-hero-cta" href="#results-cta" style={{ backgroundColor: BRAND.ink }}>
+          Schedule a free consultation
+        </a>
+      </section>
+
+      <section className="results-drivers" aria-labelledby="drivers-heading">
+        <h2 id="drivers-heading">What drove this range</h2>
+        <ul>
+          {rangeDrivers.map((driver) => (
+            <li key={driver}>
+              <span className="results-driver-dot" aria-hidden="true" />
+              <span>{driver}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="results-incl-excl" aria-label="What’s included and what’s not">
+        <div className="results-incl-box">
+          <h3>What’s included</h3>
+          <ul>
+            {RESULTS_INCLUDED.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="results-excl-box">
+          <h3>What’s not</h3>
+          <ul>
+            {RESULTS_EXCLUDED.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="results-trust" aria-labelledby="trust-heading">
+        <h2 id="trust-heading" className="results-trust-heading">What homeowners say</h2>
+        <p className="results-trust-note">
+          Themes from Google reviews — communication, quality, timing. Not fabricated reviewer names.
+        </p>
+        <div className="results-trust-strip">
+          {RESULTS_TRUST_THEMES.map((item) => (
+            <figure key={item.attr} className="results-trust-card">
+              <blockquote>“{item.quote}”</blockquote>
+              <figcaption>{item.attr}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
+      <section className="results-cta-panel" id="results-cta" aria-labelledby="cta-heading">
+        <h2 id="cta-heading" className="results-cta-heading">Ready for a firm number?</h2>
+        <p className="results-next-step">
+          We review your range, confirm scope on site, then give a firm quote.
+          Schedule a free consultation—no pressure, just clarity.
+        </p>
+
+        <form className="results-consult-form" onSubmit={submitConsultationRequest}>
+          <div className="results-consult-grid">
+            <div className="results-field">
+              <label htmlFor="consult-name">Full name <span className="req">required</span></label>
+              <input
+                id="consult-name"
+                name="fullName"
+                type="text"
+                autoComplete="name"
+                required
+                placeholder="Alex Rivera"
+                value={consultationForm.fullName}
+                onChange={(event) => setConsultationForm((prev) => ({ ...prev, fullName: event.target.value }))}
+              />
             </div>
-          ) : null}
-          <div className="section-copy">
-            {project.id === 'kitchen'
-              ? 'Based on similar kitchen projects and your selections'
-              : project.id === 'bathroom'
-                ? bathroomHasFallbackSelections
-                  ? bathroomFallbackConfidenceMessage
-                  : 'Based on your bathroom type, layout complexity, fixture selections, and finish level.'
-                : project.id === 'suite'
-                  ? suiteConfidenceMessage
-                  : project.id === 'addition'
-                    ? additionHasFallbackSelections
-                      ? additionFallbackConfidenceMessage
-                      : additionConfidenceMessage
-                : 'Based on your selected scope, finish level, and project type.'}
-          </div>
-          {project.id === 'kitchen' ? <div className="section-copy">Most homeowners spend around {rangeToText([estimate.low, estimate.high])} for a kitchen like this</div> : null}
-          {project.id === 'suite' ? (
-            <div className="top-md">
-              <div className="section-subtitle" style={{ color: BRAND.ink }}>What drove this range</div>
-              <ul className="top-sm section-copy" style={{ margin: 0, paddingLeft: '1rem' }}>
-                {suiteKeyDrivers.map((driver) => (
-                  <li key={driver}>{driver}</li>
-                ))}
-              </ul>
+            <div className="results-field">
+              <label htmlFor="consult-phone">Phone <span className="req">required</span></label>
+              <input
+                id="consult-phone"
+                name="phone"
+                type="tel"
+                autoComplete="tel"
+                required
+                placeholder="(423) 555-0123"
+                value={consultationForm.phone}
+                onChange={(event) => setConsultationForm((prev) => ({ ...prev, phone: event.target.value }))}
+              />
             </div>
-          ) : null}
-          {project.id === 'addition' ? (
-            <div className="top-md">
-              <div className="section-subtitle" style={{ color: BRAND.ink }}>What drove this range</div>
-              <ul className="top-sm section-copy" style={{ margin: 0, paddingLeft: '1rem' }}>
-                {additionKeyDrivers.map((driver) => (
-                  <li key={driver}>{driver}</li>
-                ))}
-              </ul>
+            <div className="results-field results-field-wide">
+              <label htmlFor="consult-email">Email <span className="req">required</span></label>
+              <input
+                id="consult-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                placeholder="you@example.com"
+                value={consultationForm.email}
+                onChange={(event) => setConsultationForm((prev) => ({ ...prev, email: event.target.value }))}
+              />
             </div>
-          ) : null}
-          <div className="grid-three top-lg">
-            <SummaryPill label="Project type" value={project.name} />
-            <SummaryPill label={derivedTierProjectIds.has(project.id) ? 'Inferred tier' : 'Selected tier'} value={TIERS[activeTier as TierKey].label} highlight />
-            <SummaryPill label="Prepared for" value={lead.fullName || 'Prospective Client'} />
-          </div>
-          <div className="top-xl">
-            <div className="section-subtitle" style={{ color: BRAND.ink }}>Selections summary</div>
-            <div className="stack-sm top-md">
-              {estimate.summary.map((item, index) => (
-                <div key={`${item.section}-${item.answer}-${index}`} className="summary-row">
-                  <div className="summary-row-label" style={{ color: BRAND.forest }}>{item.section}</div>
-                  <div className="summary-row-value">{item.answer}</div>
-                </div>
-              ))}
+            <div className="results-field results-field-wide">
+              <label htmlFor="consult-notes">Notes <span className="req req-optional">optional</span></label>
+              <textarea
+                id="consult-notes"
+                name="notes"
+                rows={2}
+                placeholder="Anything we should know before we call?"
+                value={consultationForm.notes}
+                onChange={(event) => setConsultationForm((prev) => ({ ...prev, notes: event.target.value }))}
+              />
             </div>
           </div>
-          <div className="disclaimer top-xl" style={{ borderColor: BRAND.sand, backgroundColor: BRAND.cream, color: BRAND.forest }}>
-            {project.id === 'bathroom'
-              ? bathroomHasFallbackSelections
-                ? bathroomFallbackConfidenceMessage
-                : bathroomConfidenceMessage
-              : project.id === 'suite'
-                ? `${suiteConfidenceMessage} ${suiteHasFallbackSelections ? suiteFallbackConfidenceMessage : ''}`.trim()
-                : project.id === 'addition'
-                  ? `${additionHasFallbackSelections ? additionFallbackConfidenceMessage : additionConfidenceMessage} Additions can vary significantly based on engineering, tie-ins, and permit requirements, so this estimate is an early planning range.`
-              : 'This estimate is a planning range based on the selections above. Final pricing depends on field conditions, structural requirements, measurements, permits, engineering, and material availability.'}
+          {consultationError ? <div className="status-box status-error" role="alert">{consultationError}</div> : null}
+          {consultationSuccess ? <div className="status-box status-success" role="status">{consultationSuccess}</div> : null}
+          <Button type="submit" className="full text-white results-cta" style={{ backgroundColor: BRAND.ink }} disabled={consultationSubmitting}>
+            {consultationSubmitting ? <><Loader2 className="icon-inline spin" /> Sending…</> : 'Schedule a free consultation'}
+          </Button>
+        </form>
+
+        <div className="results-secondary">
+          <a className="btn btn-outline results-secondary-btn" href={`tel:${PHONE_TEL}`}>
+            Call {PHONE_DISPLAY}
+          </a>
+          <button type="button" className="btn btn-outline results-secondary-btn" onClick={downloadPdf}>
+            <Download className="icon-inline" /> Download PDF
+          </button>
+          <a className="btn btn-outline results-secondary-btn" href={`mailto:${CONTACT_EMAIL}`}>
+            Email us
+          </a>
+        </div>
+        <p className="results-dual-call">
+          Prefer to talk now? Call <a href={`tel:${PHONE_TEL}`}>{PHONE_DISPLAY}</a> · Hixson, TN
+        </p>
+      </section>
+
+      {estimate.summary.length ? (
+        <details className="results-selections">
+          <summary>
+            Your selections
+            <span className="results-selections-count">{estimate.summary.length} answers</span>
+          </summary>
+          <div className="results-selections-body">
+            {estimate.summary.map((item, index) => (
+              <div key={`${item.section}-${item.answer}-${index}`} className="results-selection-row">
+                <div className="results-selection-label">{item.section}</div>
+                <div className="results-selection-value">{item.answer}</div>
+              </div>
+            ))}
+          </div>
+        </details>
+      ) : null}
+
+      <section className="results-qualifying" aria-labelledby="qual-heading">
+        <h3 id="qual-heading">Optional details (helps us prepare)</h3>
+        <p className="results-qualifying-copy">
+          Skip anything you’re not ready to share. No financing questions — we don’t offer financing.
+        </p>
+        <div className="results-qual-grid">
+          <div className="results-field">
+            <label htmlFor="consult-zip">ZIP code</label>
+            <input
+              id="consult-zip"
+              name="zip"
+              type="text"
+              inputMode="numeric"
+              maxLength={10}
+              autoComplete="postal-code"
+              placeholder="37343"
+              value={consultationForm.projectAddress}
+              onChange={(event) => setConsultationForm((prev) => ({ ...prev, projectAddress: event.target.value }))}
+            />
+          </div>
+          <div className="results-field">
+            <div id="timing-label">Timing</div>
+            <div className="results-chip-group" role="group" aria-labelledby="timing-label">
+              {RESULTS_TIMING_OPTIONS.map((option) => {
+                const active = consultationForm.preferredCallbackTime === option
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    className={`results-chip${active ? ' is-active' : ''}`}
+                    aria-pressed={active}
+                    onClick={() => setConsultationForm((prev) => ({
+                      ...prev,
+                      preferredCallbackTime: prev.preferredCallbackTime === option ? '' : option,
+                    }))}
+                  >
+                    {option}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </div>
-      </Card>
-      <Card>
-        <div className="card-pad">
-          <div className="kicker" style={{ color: BRAND.forest }}>Next step</div>
-          <div className="section-subtitle top-sm" style={{ color: BRAND.ink }}>Save your summary and move toward a real proposal.</div>
-          <p className="section-copy top-sm">Your result is intended to help set expectations and start the conversation. The next step is a consultation, site review, and detailed scope discussion.</p>
-          <div className="form-stack top-xl">
-            <Button className="full text-white" style={{ backgroundColor: BRAND.ink }} onClick={downloadPdf}><Download className="icon-inline" /> Download Estimate Summary</Button>
-            <Button variant="outline" className="full" onClick={openConsultationModal}>Schedule Consultation</Button>
-            <Button variant="outline" className="full" onClick={() => { window.location.href = 'mailto:info@peacefulhavenhomes.com' }}>
-              <Mail className="icon-inline" /> Email Us
-            </Button>
-            <Button variant="outline" className="full" onClick={() => { window.location.href = 'tel:+14237776849' }}>
-              <Phone className="icon-inline" /> Call Us
-            </Button>
-          </div>
-        </div>
-      </Card>
+        <p className="results-company-foot">
+          Peaceful Haven Homes · {COMPANY_ADDRESS} ·{' '}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+        </p>
+      </section>
     </div>
   ) : null
 
@@ -2574,14 +2846,16 @@ export default function App() {
   else if (currentQuestion) stepContent = questionStep
 
   return (
-    <div className={`page${currentStage === 'welcome' ? ' page-welcome' : ''}${currentStage === 'lead' ? ' page-gate' : ''}`} style={{ backgroundColor: BRAND.cream }}>
+    <div className={`page${currentStage === 'welcome' ? ' page-welcome' : ''}${currentStage === 'lead' ? ' page-gate' : ''}${currentStage === 'results' ? ' page-results' : ''}`} style={{ backgroundColor: BRAND.cream }}>
       <div className="container">
         <div className="header-row">
           <div className="brand-wrap">
             <img src={logo} alt="Peaceful Haven Homes logo" className="brand-logo" />
             <div>
               <div className="brand-kicker" style={{ color: BRAND.forest }}>Peaceful Haven Homes</div>
-              <h1 className="app-title" style={{ color: BRAND.ink }}>Project Range Estimator</h1>
+              <h1 className="app-title" style={{ color: BRAND.ink }}>
+                {currentStage === 'results' ? 'Your planning range' : 'Project Range Estimator'}
+              </h1>
             </div>
           </div>
           <div className="header-contact-wrap">
@@ -2597,7 +2871,7 @@ export default function App() {
           </div>
         </div>
 
-        {step > 0 ? (
+        {step > 0 && currentStage !== 'results' ? (
           <Card className="progress-card">
             <div className="card-pad-sm">
               <div className="progress-row">
@@ -2640,24 +2914,12 @@ export default function App() {
 
         {step > 0 ? (
           <div className="top-md center">
-            <Button variant="outline" onClick={startOver} style={{ borderColor: BRAND.sage, color: BRAND.ink }}>
+            <Button variant="outline" className={currentStage === 'results' ? 'results-start-over' : ''} onClick={startOver} style={{ borderColor: BRAND.sage, color: BRAND.ink }}>
               Start Over
             </Button>
           </div>
         ) : null}
       </div>
-      {consultationOpen ? (
-        <ConsultationModal
-          form={consultationForm}
-          onChange={(patch) => setConsultationForm((prev) => ({ ...prev, ...patch }))}
-          onClose={closeConsultationModal}
-          onSubmit={submitConsultationRequest}
-          summary={estimateSummary}
-          error={consultationError}
-          success={consultationSuccess}
-          submitting={consultationSubmitting}
-        />
-      ) : null}
     </div>
   )
 }
@@ -2702,100 +2964,6 @@ function Field({
         />
       </div>
       {helper ? <p className="form-helper">{helper}</p> : null}
-    </div>
-  )
-}
-
-function ConsultationModal({
-  form,
-  onChange,
-  onClose,
-  onSubmit,
-  summary,
-  error,
-  success,
-  submitting,
-}: {
-  form: {
-    fullName: string
-    phone: string
-    email: string
-    preferredCallbackTime: string
-    projectAddress: string
-    notes: string
-  }
-  onChange: (patch: Partial<{
-    fullName: string
-    phone: string
-    email: string
-    preferredCallbackTime: string
-    projectAddress: string
-    notes: string
-  }>) => void
-  onClose: () => void
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void
-  summary: EstimateSummary
-  error: string
-  success: string
-  submitting: boolean
-}) {
-  return (
-    <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Schedule Consultation">
-      <div className="modal-card">
-        <div className="modal-header">
-          <div>
-            <div className="kicker" style={{ color: BRAND.forest }}>Peaceful Haven Homes</div>
-            <h3 className="modal-title">Schedule Consultation</h3>
-          </div>
-          <button type="button" className="modal-close" onClick={onClose} aria-label="Close Schedule Consultation form">
-            <X className="icon-inline" />
-          </button>
-        </div>
-        <form className="modal-form top-lg" onSubmit={onSubmit}>
-          <div className="grid-two">
-            <Field label="Full Name *" icon={<User className="field-icon" />} value={form.fullName} onChange={(value) => onChange({ fullName: value })} placeholder="Your full name" />
-            <Field label="Phone Number *" icon={<Phone className="field-icon" />} value={form.phone} onChange={(value) => onChange({ phone: value })} placeholder="(555) 555-5555" />
-          </div>
-          <Field label="Email Address *" icon={<Mail className="field-icon" />} value={form.email} onChange={(value) => onChange({ email: value })} placeholder="you@example.com" type="email" />
-          <div className="grid-two">
-            <Field label="Preferred Callback Time" icon={<CalendarClock className="field-icon" />} value={form.preferredCallbackTime} onChange={(value) => onChange({ preferredCallbackTime: value })} placeholder="Weekdays after 4 PM" />
-            <Field label="Project Address" icon={<MapPin className="field-icon" />} value={form.projectAddress} onChange={(value) => onChange({ projectAddress: value })} placeholder="123 Main St, City, ST" />
-          </div>
-          <div>
-            <label className="label">Notes</label>
-            <textarea className="textarea" value={form.notes} onChange={(event) => onChange({ notes: event.target.value })} placeholder="Tell us about your project timing, priorities, and goals." />
-          </div>
-          <div className="estimate-attachment">
-            <div className="section-subtitle attachment-title" style={{ color: BRAND.ink }}>Attached Estimate Summary</div>
-            <div className="stack-sm top-md">
-              <div className="summary-row">
-                <div className="summary-row-label" style={{ color: BRAND.forest }}>Project type</div>
-                <div className="summary-row-value">{summary.projectType}</div>
-              </div>
-              <div className="summary-row">
-                <div className="summary-row-label" style={{ color: BRAND.forest }}>Finish level</div>
-                <div className="summary-row-value">{summary.finishLevel}</div>
-              </div>
-              <div className="summary-row">
-                <div className="summary-row-label" style={{ color: BRAND.forest }}>Estimated range</div>
-                <div className="summary-row-value">{summary.estimatedRange}</div>
-              </div>
-              <div className="summary-row">
-                <div className="summary-row-label" style={{ color: BRAND.forest }}>Selections included</div>
-                <div className="summary-row-value">{summary.selections.length}</div>
-              </div>
-            </div>
-          </div>
-          {error ? <div className="status-box status-error">{error}</div> : null}
-          {success ? <div className="status-box status-success">{success}</div> : null}
-          <div className="modal-actions">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" className="text-white" style={{ backgroundColor: BRAND.ink }} disabled={submitting}>
-              {submitting ? <><Loader2 className="icon-inline spin" /> Saving...</> : 'Submit Request'}
-            </Button>
-          </div>
-        </form>
-      </div>
     </div>
   )
 }
