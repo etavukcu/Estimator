@@ -2041,7 +2041,11 @@ export default function App() {
   function handleLeadPdfSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!canSubmitLeadPdf) return
-    downloadPdf()
+    try {
+      downloadPdf()
+    } catch (error) {
+      console.error('Unable to generate the planning PDF.', error)
+    }
     continueToResults()
   }
 
