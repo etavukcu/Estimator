@@ -2636,6 +2636,9 @@ export default function App() {
           Honest planning range for the Chattanooga / Hixson area · Not a firm bid.
           A free consultation turns this into a scoped quote.
         </p>
+        <a className="btn text-white results-hero-cta" href="#results-cta" style={{ backgroundColor: BRAND.ink }}>
+          Schedule a free consultation
+        </a>
       </section>
 
       <section className="results-drivers" aria-labelledby="drivers-heading">
@@ -2684,7 +2687,7 @@ export default function App() {
         </div>
       </section>
 
-      <section className="results-cta-panel" aria-labelledby="cta-heading">
+      <section className="results-cta-panel" id="results-cta" aria-labelledby="cta-heading">
         <h2 id="cta-heading" className="results-cta-heading">Ready for a firm number?</h2>
         <p className="results-next-step">
           We review your range, confirm scope on site, then give a firm quote.
@@ -2766,6 +2769,23 @@ export default function App() {
           Prefer to talk now? Call <a href={`tel:${PHONE_TEL}`}>{PHONE_DISPLAY}</a> · Hixson, TN
         </p>
       </section>
+
+      {estimate.summary.length ? (
+        <details className="results-selections">
+          <summary>
+            Your selections
+            <span className="results-selections-count">{estimate.summary.length} answers</span>
+          </summary>
+          <div className="results-selections-body">
+            {estimate.summary.map((item, index) => (
+              <div key={`${item.section}-${item.answer}-${index}`} className="results-selection-row">
+                <div className="results-selection-label">{item.section}</div>
+                <div className="results-selection-value">{item.answer}</div>
+              </div>
+            ))}
+          </div>
+        </details>
+      ) : null}
 
       <section className="results-qualifying" aria-labelledby="qual-heading">
         <h3 id="qual-heading">Optional details (helps us prepare)</h3>
