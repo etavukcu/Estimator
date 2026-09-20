@@ -76,6 +76,24 @@ const BRAND = {
   cream: '#F4F7FA',
 }
 
+const PHONE_DISPLAY = '423-777-6849'
+const PHONE_TEL = '+14237776849'
+const CONTACT_EMAIL = 'info@peacefulhavenhomes.com'
+
+const LANDING_PROJECT_PREVIEWS = [
+  { id: 'kitchen', name: 'Kitchen', icon: ChefHat },
+  { id: 'bathroom', name: 'Bathroom', icon: Bath },
+  { id: 'suite', name: 'Mother-in-Law Suite', icon: Home },
+  { id: 'addition', name: 'Home Addition', icon: Building2 },
+] as const
+
+const LANDING_HOW_STEPS = [
+  { title: 'Choose project', copy: 'Kitchen, bathroom, MIL suite, or home addition.' },
+  { title: 'Answer questions', copy: 'Size, layout, finishes, and a few site details.' },
+  { title: 'See your range', copy: 'A Chattanooga-area planning range based on your picks.' },
+  { title: 'Optional PDF & consult', copy: 'Email a summary or book a free walkthrough.' },
+] as const
+
 const TIERS: Record<TierKey, { label: string; subtitle: string; description: string; highlight: boolean }> = {
   good: {
     label: 'Good',
@@ -1703,6 +1721,129 @@ function Card(props: React.HTMLAttributes<HTMLDivElement>) {
   return <div {...props} className={`card ${props.className || ''}`.trim()} />
 }
 
+function WelcomeLanding({
+  onStart,
+  onStartProject,
+}: {
+  onStart: () => void
+  onStartProject: (id: string) => void
+}) {
+  return (
+    <div className="landing">
+      <div className="landing-hero">
+        <Card style={{ backgroundColor: 'white' }}>
+          <div className="card-pad-lg">
+            <div className="feature-chip" style={{ backgroundColor: BRAND.sand, color: BRAND.ink }}>
+              <span className="kicker-dot" aria-hidden="true" />
+              Project Range Estimator
+            </div>
+            <h2 className="hero-title" style={{ color: BRAND.ink }}>
+              Get a planning range for your remodel or addition.
+            </h2>
+            <p className="hero-copy">
+              Answer a few guided questions (about 2–4 minutes) and see a tailored
+              Chattanooga-area planning range—before you commit to drawings or a site visit.
+            </p>
+
+            <div className="trust-row" role="group" aria-label="Trust signals">
+              <div className="trust-rating">Google reviews</div>
+              <blockquote className="trust-quote">
+                “Clear communication from start to finish—and the work looked as good as promised.”
+                <span className="sr-only">Paraphrase of Google review themes; not a verbatim quote or star rating.</span>
+              </blockquote>
+              <div className="trust-meta">
+                Licensed & insured · Hixson, TN · Serving Chattanooga & nearby
+              </div>
+            </div>
+
+            <ul className="landing-feature-list" aria-label="What this estimate includes">
+              <li><span className="landing-check" aria-hidden="true">✓</span> Tailored to your selections</li>
+              <li><span className="landing-check" aria-hidden="true">✓</span> Realistic finish levels (Good / Better / Best)</li>
+              <li><span className="landing-check" aria-hidden="true">✓</span> Free planning PDF you can share with your household</li>
+            </ul>
+
+            <div className="btn-row wrap-gap">
+              <Button className="text-white landing-cta" style={{ backgroundColor: BRAND.ink }} onClick={onStart}>
+                Start My Estimate <ArrowRight className="icon-inline" />
+              </Button>
+              <a className="btn btn-outline landing-cta" href={`tel:${PHONE_TEL}`}>
+                <Phone className="icon-inline" /> Call {PHONE_DISPLAY}
+              </a>
+            </div>
+          </div>
+        </Card>
+
+        <aside className="hero-aside" aria-label="What you’ll walk away with">
+          <div className="hero-aside-title" style={{ color: BRAND.forest }}>What you’ll walk away with</div>
+          <div className="mini-stat"><span>Time to complete</span><strong>~2–4 min</strong></div>
+          <div className="mini-stat"><span>Output</span><strong>Planning range</strong></div>
+          <div className="mini-stat"><span>Optional</span><strong>PDF + consult</strong></div>
+          <div className="mini-stat"><span>Obligation</span><strong>None</strong></div>
+          <p className="hero-aside-note">
+            This is a planning tool—not a firm bid. After your range, you can book a free
+            consultation for an on-site scope and firm quote.
+          </p>
+          <Button className="full text-white top-lg landing-cta" style={{ backgroundColor: BRAND.ink }} onClick={onStart}>
+            Start My Estimate
+          </Button>
+        </aside>
+      </div>
+
+      <section className="how-section" aria-labelledby="how-heading">
+        <h2 id="how-heading" className="section-title" style={{ color: BRAND.ink }}>How it works</h2>
+        <p className="section-copy mt-0">Four short steps from curiosity to a useful planning number.</p>
+        <div className="how-grid">
+          {LANDING_HOW_STEPS.map((step, index) => (
+            <div key={step.title} className="how-step">
+              <div className="how-num" style={{ backgroundColor: BRAND.ink }}>{index + 1}</div>
+              <h3>{step.title}</h3>
+              <p>{step.copy}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="project-preview" aria-labelledby="projects-heading">
+        <h2 id="projects-heading" className="section-title" style={{ color: BRAND.ink }}>Project types we estimate</h2>
+        <div className="landing-project-grid">
+          {LANDING_PROJECT_PREVIEWS.map((item) => {
+            const Icon = item.icon
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className="landing-project-card"
+                onClick={() => onStartProject(item.id)}
+              >
+                <span className="project-card-placeholder" aria-hidden="true">
+                  <Icon className="photo-placeholder-icon" />
+                </span>
+                <span className="landing-project-copy">
+                  <strong>{item.name}</strong>
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
+        <p className="project-note">
+          Basement finishing, home office, or media/theater projects aren’t in this estimator yet—
+          {' '}<a href={`tel:${PHONE_TEL}`}>call for a discovery consult</a>
+          {' '}or email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+        </p>
+      </section>
+
+      <footer className="landing-footer">
+        <span>Peaceful Haven Homes</span>
+        <span className="landing-footer-sep" aria-hidden="true">·</span>
+        <span>Hixson, TN</span>
+        <span className="landing-footer-sep" aria-hidden="true">·</span>
+        <a href={`tel:${PHONE_TEL}`}>{PHONE_DISPLAY}</a>
+      </footer>
+    </div>
+  )
+}
+
 function SelectCard({ active, className = '', children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }) {
   return (
     <button
@@ -1835,6 +1976,10 @@ export default function App() {
   function next() { if (canContinue()) setStep((s) => Math.min(s + 1, stages.length - 1)) }
   function back() { setStep((s) => Math.max(s - 1, 0)) }
   function start() { setStep(1) }
+  function startFromProject(id: string) {
+    handleProjectSelect(id)
+    setStep(1)
+  }
   function startOver() {
     setStep(0)
     setProjectId('')
@@ -2021,46 +2166,7 @@ export default function App() {
     pdf.save(`peaceful-haven-${project.id}-estimate.pdf`)
   }
 
-  const welcome = (
-    <div className="layout-two">
-      <Card style={{ backgroundColor: 'white' }}>
-        <div className="card-pad-lg">
-          <div className="feature-chip" style={{ backgroundColor: BRAND.sand, color: BRAND.ink }}>Guided scope-based pricing paths</div>
-          <h2 className="hero-title" style={{ color: BRAND.ink }}>Get a planning range for your remodel.</h2>
-          <p className="hero-copy">Answer a few guided questions and receive a tailored project range based on your project type and selections.</p>
-          <div className="feature-highlights top-lg" aria-label="What this estimate includes">
-            {[
-              { icon: '✓', text: 'Tailored to your selections' },
-              { icon: '✦', text: 'Designed around realistic finish levels' },
-              { icon: 'ℹ', text: 'Includes a downloadable PDF summary' },
-            ].map((item) => (
-              <div key={item.text} className="feature-highlight-item">
-                <span className="feature-highlight-icon" aria-hidden="true">{item.icon}</span>
-                <span>{item.text}</span>
-              </div>
-            ))}
-          </div>
-          <div className="row-gap wrap-gap top-xl">
-            <Button className="text-white" style={{ backgroundColor: BRAND.ink }} onClick={start}>Start My Estimate <ArrowRight className="icon-inline" /></Button>
-            <div className="muted" style={{ color: BRAND.forest }}>Takes about 2-4 minutes</div>
-          </div>
-        </div>
-      </Card>
-      <Card className="text-white" style={{ background: `linear-gradient(135deg, ${BRAND.ink}, ${BRAND.forest})` }}>
-        <div className="card-pad-lg">
-          <div className="kicker light">How it works</div>
-          <div className="stack-lg top-lg">
-            {['Choose your project type', 'Answer guided project questions', 'We infer the project tier', 'Enter contact details', 'Download your PDF summary'].map((item, index) => (
-              <div key={item} className="row-gap">
-                <div className="step-bubble">{index + 1}</div>
-                <div className="light-copy">{item}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
-    </div>
-  )
+  const welcome = <WelcomeLanding onStart={start} onStartProject={startFromProject} />
 
   const projectStep = (
     <Card>
@@ -2295,7 +2401,7 @@ export default function App() {
   else if (currentQuestion) stepContent = questionStep
 
   return (
-    <div className="page" style={{ backgroundColor: BRAND.cream }}>
+    <div className={`page${currentStage === 'welcome' ? ' page-welcome' : ''}`} style={{ backgroundColor: BRAND.cream }}>
       <div className="container">
         <div className="header-row">
           <div className="brand-wrap">
@@ -2306,10 +2412,15 @@ export default function App() {
             </div>
           </div>
           <div className="header-contact-wrap">
-            <a className="header-contact" style={{ color: BRAND.forest }} href="tel:+14237776849" aria-label="Call Peaceful Haven Homes at 423-777-6849">
+            <a className="header-contact" style={{ color: BRAND.forest }} href={`tel:${PHONE_TEL}`} aria-label={`Call Peaceful Haven Homes at ${PHONE_DISPLAY}`}>
               <Phone className="icon-inline" />
-              423-777-6849
+              {PHONE_DISPLAY}
             </a>
+            {currentStage === 'welcome' ? (
+              <Button className="text-white header-start-btn landing-cta" style={{ backgroundColor: BRAND.ink }} onClick={start}>
+                Start My Estimate
+              </Button>
+            ) : null}
           </div>
         </div>
 
