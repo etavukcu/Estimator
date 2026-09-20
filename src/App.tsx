@@ -91,7 +91,7 @@ const LANDING_HOW_STEPS = [
   { title: 'Choose project', copy: 'Kitchen, bathroom, MIL suite, or home addition.' },
   { title: 'Answer questions', copy: 'Size, layout, finishes, and a few site details.' },
   { title: 'See your range', copy: 'A Chattanooga-area planning range based on your picks.' },
-  { title: 'Optional PDF & consult', copy: 'Email a summary or book a free walkthrough.' },
+  { title: 'Optional PDF & consult', copy: 'Download a PDF (we notify our team) or book a free walkthrough.' },
 ] as const
 
 const TIERS: Record<TierKey, { label: string; subtitle: string; description: string; highlight: boolean }> = {
