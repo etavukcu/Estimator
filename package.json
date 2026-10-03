@@ -11,7 +11,7 @@
     "dev:client": "vite",
     "dev:server": "node server/index.mjs",
     "start": "npm run build && npm run dev:server",
-    "test": "node --test lib/leadNotification.test.mjs",
+    "test": "node --test lib/leadNotification.test.mjs lib/supabaseKeepalive.test.mjs",
     "test:lead-email": "node --test lib/leadNotification.test.mjs"
   },
   "dependencies": {

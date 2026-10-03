@@ -18,8 +18,21 @@ In the Vercel project → **Settings → Environment Variables**, add these for 
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes (already used today) | Existing consultation insert. |
 | `LEAD_NOTIFY_TO` | Optional | Defaults to `info@peacefulhavenhomes.com`. Set to your own inbox for a first smoke test. |
 | `LEAD_EMAIL_DRY_RUN` | Optional | Set to `true` only for local/dev. Logs the email body and does **not** call Resend. |
+| `CRON_SECRET` | **Yes, for the keep-alive** | Random string, 16+ characters. Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>` to `GET /api/cron/supabase-keepalive`. The route stays closed until this is set. |
 
 `onboarding@resend.dev` can only send to the Resend account owner. It cannot deliver to `info@peacefulhavenhomes.com`. Production delivery needs a verified domain in Resend.
+
+### Supabase keep-alive
+
+Free-tier Supabase projects pause after about a week without API traffic. `vercel.json` schedules `GET /api/cron/supabase-keepalive` once a day at 12:00 UTC (Hobby allows a daily cron; Vercel may run it any time during that hour).
+
+The handler checks `Authorization: Bearer <CRON_SECRET>`, then issues one read:
+
+`GET /rest/v1/consultation_requests?select=id&limit=1`
+
+It uses the existing `SUPABASE_URL` plus `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_ANON_KEY`. Success is `{ "ok": true }`. It does not insert rows and does not send email. Row-level security only allows inserts for the anon role, so an anon read can succeed with an empty list; that still counts as project activity. A failing read is `{ "ok": false }` with a short error and does not include row data.
+
+Set `CRON_SECRET` on the Vercel project (Production) before or with the deploy that adds this route. Environment variable changes are picked up on the next deployment. Until the secret is present, the cron receives `401` and does not call Supabase.
 
 Existing optional client vars:
 
